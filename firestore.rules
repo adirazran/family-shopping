@@ -19,6 +19,14 @@ service cloud.firestore {
       allow update, delete: if true;
     }
 
+    // אווטאר של כל משתתף ברשימת הקניות
+    match /profiles/{id} {
+      allow read: if true;
+      allow write: if request.resource.data.keys().hasOnly(['emoji'])
+                   && request.resource.data.emoji is string
+                   && request.resource.data.emoji.size() < 16;
+    }
+
     // ===== תוכנת הוצאות למשפחה (family-expenses) =====
     // לכל ילד מפתח סודי משלו בקישור. רק מי שמחזיק את הקישור רואה את הגיליון.
     // אי אפשר לקבל רשימה של כל הגיליונות (אין כלל ל-/fx/{key} עצמו).
