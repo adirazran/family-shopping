@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#2f7a4a">
+<meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="קניות">
@@ -16,18 +16,13 @@
 <style>
 /* Layout: one-screen app — header on top, scrolling list, add bar with suggestions pinned to the bottom. Market-stall palette: leaf green, tomato, paper. */
 :root{
-  --bg:#f3f5ef; --surface:#ffffff; --sunk:#e7ebe0; --fg:#1d2a1f; --muted:#5f6d60;
-  --leaf:#2f7a4a; --leaf-soft:#d9eedd; --tomato:#d9482b; --line:#d5dccd; --done:#8a958b;
+  --bg:#fbf8f1; --surface:#ffffff; --sunk:#f1ece0; --fg:#1d2a1f; --muted:#6b6f63;
+  --leaf:#2f7a4a; --leaf-soft:#e3f2e6; --tomato:#d9482b; --line:#e6e0d2; --done:#9a9c92;
+  color-scheme:light;
   --display:"Secular One","Assistant",system-ui,sans-serif;
   --body:"Assistant",system-ui,-apple-system,"Segoe UI",sans-serif;
   padding-top:env(safe-area-inset-top,0px);
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#121813; --surface:#1b231c; --sunk:#232d24; --fg:#e8eee6; --muted:#9aa89b;
-  --leaf:#5cbf7d; --leaf-soft:#1f3a27; --tomato:#ff7559; --line:#2e3a2f; --done:#6f7b70; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#121813; --surface:#1b231c; --sunk:#232d24; --fg:#e8eee6; --muted:#9aa89b;
-  --leaf:#5cbf7d; --leaf-soft:#1f3a27; --tomato:#ff7559; --line:#2e3a2f; --done:#6f7b70; color-scheme:dark}
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:18px;margin:0}
 *{box-sizing:border-box}
