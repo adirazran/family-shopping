@@ -60,6 +60,8 @@ h1{font-family:var(--display);font-weight:400;font-size:1.5rem;margin:0;color:va
 .item.done .qty{color:var(--done)}
 .req{font-size:.85rem;color:var(--muted);text-align:left;flex:none;max-width:40%}
 .req b{color:var(--fg)}
+.when{display:block;font-size:.75rem;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
+.new{background:var(--tomato);color:#fff;border-radius:6px;font-size:.7rem;font-weight:700;padding:1px 6px;margin-inline-start:6px;vertical-align:middle}
 .item.done .req{color:var(--done)}
 .del{border:0;background:none;color:var(--muted);font-size:1.3rem;padding:0 4px;line-height:1}
 .del:hover{color:var(--tomato)}
@@ -149,11 +151,24 @@ function av(id){const p=P[id]||{name:"?",color:"#777"};const s=document.createEl
 function nm(id){return (P[id]||{}).name||"מישהו"}
 function toast(t){const el=$("toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,1800)}
 function norm(s){return s.trim().replace(/\s+/g," ").replace(/[״"]/g,'"').replace(/[׳']/g,"'")}
+function when(ts){
+  if(!ts) return "";
+  const d=new Date(ts), now=new Date();
+  const day=x=>new Date(x.getFullYear(),x.getMonth(),x.getDate());
+  const diff=Math.round((day(now)-day(d))/864e5);
+  const hm=d.toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"});
+  if(diff===0) return "היום "+hm;
+  if(diff===1) return "אתמול "+hm;
+  if(diff<7) return "לפני "+diff+" ימים";
+  return d.toLocaleDateString("he-IL",{day:"numeric",month:"numeric"});
+}
+let lastSeen=0;
 function offline(msg){$("banner").textContent=msg;$("banner").hidden=false}
 
 /* ---------- who am I ---------- */
 function setMe(id){
   me=id; store.set("me",id);
+  lastSeen=+(store.get("seen_"+id)||Date.now()); store.set("seen_"+id,String(Date.now()));
   try{history.replaceState(null,"",location.pathname+"#"+id)}catch(e){}
   $("meAv").replaceChildren(av(id)); $("meName").textContent=P[id].name;
   $("picker").hidden=true; render();
@@ -189,9 +204,12 @@ function render(){
     c.innerHTML='<svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>';c.onclick=()=>toggle(i);
     const n=document.createElement("div");n.className="iname";n.textContent=i.name;
     if(i.qty>1){const q=document.createElement("span");q.className="qty";q.textContent="×"+i.qty;n.append(q)}
+    if(!i.done&&i.createdAt>lastSeen&&!(i.requesters||[]).every(r=>r===me)){const nw=document.createElement("span");nw.className="new";nw.textContent="חדש";n.append(nw)}
     const r=document.createElement("div");r.className="req";
-    if(i.done) r.textContent="נקנה ע״י "+nm(i.doneBy);
-    else{const bb=document.createElement("b");bb.textContent=(i.requesters||[]).map(nm).join(", ");r.append(bb)}
+    const w=document.createElement("span");w.className="when";
+    if(i.done){r.textContent="נקנה ע״י "+nm(i.doneBy);w.textContent=when(i.doneAt)}
+    else{const bb=document.createElement("b");bb.textContent=(i.requesters||[]).map(nm).join(", ");r.append(bb);w.textContent=when(i.createdAt)}
+    r.append(w);
     el.append(c,n,r);
     if(!i.done){const d=document.createElement("button");d.className="del";d.textContent="×";d.setAttribute("aria-label","מחק "+i.name);d.onclick=()=>removeItem(i);el.append(d)}
     return el;
