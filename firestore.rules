@@ -22,9 +22,17 @@ service cloud.firestore {
     // אווטאר של כל משתתף ברשימת הקניות
     match /profiles/{id} {
       allow read: if true;
-      allow write: if request.resource.data.keys().hasOnly(['emoji'])
-                   && request.resource.data.emoji is string
-                   && request.resource.data.emoji.size() < 16;
+      allow write: if request.resource.data.keys().hasOnly(['emoji', 'bday'])
+                   && (!('emoji' in request.resource.data) || (request.resource.data.emoji is string && request.resource.data.emoji.size() < 16))
+                   && (!('bday' in request.resource.data) || (request.resource.data.bday is string && request.resource.data.bday.matches('^[0-9]{2}-[0-9]{2}$')));
+    }
+    // "אני בסופר" – מי בסופר עכשיו
+    match /status/{id} {
+      allow read: if true;
+      allow write: if id == 'shopping'
+                   && request.resource.data.keys().hasOnly(['who', 'since'])
+                   && request.resource.data.who is string && request.resource.data.who.size() < 20
+                   && request.resource.data.since is number;
     }
 
     // ===== תוכנת הוצאות למשפחה (family-expenses) =====

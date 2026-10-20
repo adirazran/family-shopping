@@ -102,6 +102,25 @@ h1{font-family:var(--display);font-weight:400;font-size:1.7rem;margin:0;color:va
 .sheet-actions{display:flex;gap:8px;flex-wrap:wrap}
 .sheet-actions button{flex:1;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:12px;font-weight:700}
 .sheet-actions .primary{background:var(--leaf);color:#fff;border-color:var(--leaf)}
+.item.urgent{border-color:var(--tomato);background:#fff3ef}
+.item.urgent .iname::after{content:" 🔥";}
+.acts{display:flex;align-items:center;gap:2px;flex:none}
+.ibtn{border:0;background:none;font-size:1.3rem;padding:4px;line-height:1;opacity:.35;filter:grayscale(1)}
+.ibtn.on{opacity:1;filter:none}
+.likes{display:inline-block;margin-inline-start:6px;font-size:.95rem;color:var(--tomato);font-weight:700}
+@keyframes heart{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}100%{transform:translate(-50%,-120%) scale(1.8);opacity:0}}
+.bigheart{position:fixed;font-size:3rem;pointer-events:none;z-index:45;animation:heart .8s ease-out forwards}
+.shop{display:flex;align-items:center;gap:10px;background:#e8f1ff;border:1px solid #b8cff5;border-radius:14px;padding:10px 14px;margin-bottom:14px;font-weight:700}
+.shop .t{flex:1;min-width:0}
+.shop small{display:block;font-weight:400;color:var(--muted);font-size:.88rem}
+.shop button{border:0;background:#2563eb;color:#fff;border-radius:999px;padding:8px 14px;font-weight:700;flex:none}
+.shopbtn{border:1px solid #b8cff5;background:#e8f1ff;color:#1d4ed8;border-radius:999px;padding:8px 14px;font-weight:700;width:100%;margin-bottom:14px}
+.bday{background:linear-gradient(90deg,#ffe4ef,#fff1d6);border:1px solid #f6b8cf;border-radius:14px;padding:12px 14px;margin-bottom:14px;font-weight:700;font-size:1.15rem;text-align:center}
+.bdayrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.bdayrow label{font-weight:700}
+.bdayrow select{font:inherit;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+@keyframes rise{0%{transform:translateY(0)}100%{transform:translateY(-120vh)}}
+.balloon{position:fixed;bottom:-80px;font-size:3rem;pointer-events:none;z-index:40;animation:rise linear forwards}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:40}
 .banner{background:var(--tomato);color:#fff;padding:8px;text-align:center;font-weight:600;font-size:.9rem}
 </style>
@@ -116,7 +135,7 @@ h1{font-family:var(--display);font-weight:400;font-size:1.7rem;margin:0;color:va
     </div>
   </header>
 
-  <main class="pane wrap"><div id="king" hidden></div><div id="list"></div></main>
+  <main class="pane wrap"><div id="bday" class="bday" hidden></div><div id="shop"></div><div id="king" hidden></div><div id="list"></div></main>
 
   <div class="bottom wrap">
     <div class="sugs" id="sugs" hidden></div>
@@ -138,6 +157,8 @@ h1{font-family:var(--display);font-weight:400;font-size:1.7rem;margin:0;color:va
   <div class="panel" role="dialog" aria-label="האווטאר שלי">
     <h3 id="sheetTitle">בחרו אווטאר</h3>
     <div class="emos" id="emos"></div>
+    <div class="bdayrow"><label for="bdD">🎂 יום הולדת:</label>
+      <select id="bdD" aria-label="יום"></select><select id="bdM" aria-label="חודש"></select></div>
     <div class="sheet-actions">
       <button id="switchUser" type="button">לא אני – החלפת משתמש</button>
       <button id="closeSheet" class="primary" type="button">סגור</button>
@@ -219,7 +240,15 @@ function openSheet(){
   const box=$("emos");box.replaceChildren();const cur=(profiles[me]||{}).emoji;
   AVATARS.forEach(e=>{const b=document.createElement("button");b.type="button";b.textContent=e;b.setAttribute("aria-label","אווטאר "+e);if(e===cur)b.className="sel";
     b.onclick=async()=>{profiles[me]={emoji:e};refreshMe();render();openSheet();
-      try{await db.collection("profiles").doc(me).set({emoji:e})}catch(err){toast("לא נשמר, נסו שוב")}};box.append(b)});
+      try{await db.collection("profiles").doc(me).set({emoji:e},{merge:true})}catch(err){toast("לא נשמר, נסו שוב")}};box.append(b)});
+  const [bd,bm]=((profiles[me]||{}).bday||"-").split("-");
+  const D=$("bdD"),M=$("bdM");
+  D.innerHTML='<option value="">יום</option>'+Array.from({length:31},(_,k)=>'<option>'+String(k+1).padStart(2,"0")+'</option>').join("");
+  M.innerHTML='<option value="">חודש</option>'+MONTHS.map((m,k)=>'<option value="'+String(k+1).padStart(2,"0")+'">'+m+'</option>').join("");
+  D.value=bd||"";M.value=bm||"";
+  const save=async()=>{if(!D.value||!M.value)return;const v=D.value+"-"+M.value;profiles[me]={...(profiles[me]||{}),bday:v};render();
+    try{await db.collection("profiles").doc(me).set({bday:v},{merge:true});toast("יום ההולדת נשמר 🎂")}catch(err){toast("לא נשמר, נסו שוב")}};
+  D.onchange=save;M.onchange=save;
   $("sheet").hidden=false;
 }
 $("meBtn").onclick=()=>me?openSheet():showPicker();
@@ -239,20 +268,22 @@ function parse(text){
 
 /* ---------- render list ---------- */
 function render(){
-  renderKing();
+  renderKing();renderShop();renderBday();
   const box=$("list");box.replaceChildren();
   const live=all.filter(i=>!i.archived);
-  const open=live.filter(i=>!i.done).sort((a,b)=>a.createdAt-b.createdAt);
+  const open=live.filter(i=>!i.done).sort((a,b)=>(b.urgent?1:0)-(a.urgent?1:0)||a.createdAt-b.createdAt);
   const done=live.filter(i=>i.done).sort((a,b)=>(a.doneAt||0)-(b.doneAt||0));
   $("count").hidden=!open.length;$("count").textContent=open.length;
   if(!live.length){box.innerHTML='<div class="empty"><strong>הרשימה ריקה</strong>כתבו למטה מה צריך לקנות.<br>אפשר כמה פריטים ביחד, מופרדים בפסיק.</div>';return}
   const mk=i=>{
-    const el=document.createElement("div");el.className="item"+(i.done?" done":"");
+    const el=document.createElement("div");el.className="item"+(i.done?" done":"")+(i.urgent&&!i.done?" urgent":"");
     const c=document.createElement("button");c.className="check";c.setAttribute("aria-label",i.done?"בטל סימון":"סמן כנקנה");
     c.innerHTML='<svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>';c.onclick=()=>toggle(i);
+    const likes=i.likes||[];
     const em=document.createElement("span");em.className="emoji";em.textContent=emojiFor(i.name);em.setAttribute("aria-hidden","true");
     const n=document.createElement("div");n.className="iname";n.textContent=i.name;
     if(i.qty>1){const q=document.createElement("span");q.className="qty";q.textContent="×"+i.qty;n.append(q)}
+    if(likes.length){const lk=document.createElement("span");lk.className="likes";lk.textContent="❤️ "+likes.length;lk.title=likes.map(nm).join(", ");n.append(lk)}
     if(!i.done&&i.createdAt>lastSeen&&!(i.requesters||[]).every(r=>r===me)){const nw=document.createElement("span");nw.className="new";nw.textContent="חדש";n.append(nw)}
     const r=document.createElement("div");r.className="req";
     const w=document.createElement("span");w.className="when";
@@ -260,6 +291,13 @@ function render(){
     else{const bb=document.createElement("b");bb.textContent=(i.requesters||[]).map(nmA).join(", ");r.append(bb);w.textContent=when(i.createdAt)}
     r.append(w);
     el.append(c,em,n,r);el.dataset.id=i.id;
+    if(!i.done){
+      const acts=document.createElement("div");acts.className="acts";
+      const lb=document.createElement("button");lb.className="ibtn"+(likes.includes(me)?" on":"");lb.textContent="❤️";lb.setAttribute("aria-label","גם אני רוצה");lb.onclick=e=>like(i,e);
+      const ub=document.createElement("button");ub.className="ibtn"+(i.urgent?" on":"");ub.textContent="🔥";ub.setAttribute("aria-label","דחוף");ub.onclick=()=>urgent(i);
+      acts.append(lb,ub);el.append(acts);
+      let lastTap=0;n.addEventListener("click",e=>{const t=Date.now();if(t-lastTap<350){if(!likes.includes(me))like(i,e)}lastTap=t});
+    }
     if(!i.done){const d=document.createElement("button");d.className="del";d.textContent="×";d.setAttribute("aria-label","מחק "+i.name);d.onclick=()=>removeItem(i);el.append(d)}
     return el;
   };
@@ -292,6 +330,57 @@ function renderKing(){
   const c=document.createElement("span");c.className="crown";c.textContent="👑";
   const t=document.createElement("div");const b=document.createElement("b");b.textContent="מלך הבקשות: "+nmA(kid)+" ("+n+")";
   const sm=document.createElement("small");sm.textContent=line;t.append(b,sm);box.append(c,t);box.hidden=false;
+}
+
+/* ---------- likes & urgent ---------- */
+async function like(i,e){
+  const has=(i.likes||[]).includes(me);
+  const likes=has?(i.likes||[]).filter(x=>x!==me):[...(i.likes||[]),me];
+  if(!has&&e){const h=document.createElement("div");h.className="bigheart";h.textContent="❤️";h.style.left=e.clientX+"px";h.style.top=e.clientY+"px";document.body.append(h);setTimeout(()=>h.remove(),850);pop()}
+  try{await db.collection("items").doc(i.id).update({likes})}catch(err){toast("לא נשמר, נסו שוב")}
+}
+async function urgent(i){
+  try{await db.collection("items").doc(i.id).update({urgent:!i.urgent});if(!i.urgent)toast("🔥 "+i.name+" סומן כדחוף")}catch(err){toast("לא נשמר, נסו שוב")}
+}
+
+/* ---------- supermarket clock ---------- */
+let shopping=null;
+function renderShop(){
+  const box=$("shop");box.replaceChildren();
+  const active=shopping&&shopping.who&&Date.now()-shopping.since<3*3600e3;
+  if(!active){const b=document.createElement("button");b.className="shopbtn";b.textContent="🛒 אני יוצא/ת לסופר";b.onclick=()=>setShopping(true);box.append(b);return}
+  const mine=shopping.who===me;
+  const w=document.createElement("div");w.className="shop";
+  const ic=document.createElement("span");ic.textContent="🛒";ic.style.fontSize="1.6rem";
+  const t=document.createElement("div");t.className="t";
+  const mins=Math.max(1,Math.round((Date.now()-shopping.since)/60000));
+  t.textContent=mine?"את/ה בסופר עכשיו":nmA(shopping.who)+" בסופר עכשיו!";
+  const sm=document.createElement("small");sm.textContent=mine?"כולם רואים. סמנו כל מה שקניתם ✔":"מה שתוסיפו עכשיו יופיע לו/ה מיד · לפני "+mins+" דק׳";t.append(sm);
+  w.append(ic,t);
+  if(mine){const b=document.createElement("button");b.textContent="סיימתי";b.onclick=()=>setShopping(false);w.append(b)}
+  box.append(w);
+}
+async function setShopping(on){
+  try{await db.collection("status").doc("shopping").set(on?{who:me,since:Date.now()}:{who:"",since:0});
+    toast(on?"בהצלחה בסופר! 🛒":"תודה! 🙌")}catch(err){toast("לא נשמר, נסו שוב")}
+}
+setInterval(()=>{if(shopping&&shopping.who)renderShop()},60000);
+
+/* ---------- birthdays ---------- */
+let balloonsShown=false;
+function renderBday(){
+  const now=new Date(),today=String(now.getDate()).padStart(2,"0")+"-"+String(now.getMonth()+1).padStart(2,"0");
+  const kids=PEOPLE.filter(p=>(profiles[p.id]||{}).bday===today);
+  const box=$("bday");
+  if(!kids.length){box.hidden=true;return}
+  box.textContent="🎉 מזל טוב "+kids.map(p=>nmA(p.id)).join(" ו")+"! יום הולדת שמח 🎂";box.hidden=false;
+  const key="balloons_"+today+"_"+(me||"");
+  if(!balloonsShown&&store.get(key)!=="1"&&!matchMedia("(prefers-reduced-motion: reduce)").matches){
+    balloonsShown=true;store.set(key,"1");
+    for(let k=0;k<18;k++){const b=document.createElement("div");b.className="balloon";b.textContent=["🎈","🎈","🎉","🎂","🎁"][k%5];
+      b.style.left=(Math.random()*90)+"vw";b.style.animationDuration=(4+Math.random()*3)+"s";b.style.animationDelay=(Math.random()*1.5)+"s";
+      document.body.append(b);setTimeout(()=>b.remove(),9000)}
+  }
 }
 
 /* ---------- pop sound + confetti ---------- */
@@ -392,6 +481,7 @@ try{
   db.collection("items").orderBy("createdAt","desc").limit(800).onSnapshot(s=>{
     all=s.docs.map(d=>({id:d.id,...d.data()}));render();
   },()=>offline("אין חיבור לרשימה – בדקו אינטרנט ורעננו"));
+  db.collection("status").doc("shopping").onSnapshot(d=>{shopping=d.exists?d.data():null;renderShop()},()=>{});
   db.collection("profiles").onSnapshot(s=>{profiles={};s.docs.forEach(d=>profiles[d.id]=d.data());refreshMe();render()},()=>{});
 }catch(e){offline("שגיאה בחיבור לנתונים")}
 </script>
