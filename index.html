@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2f7a4a">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="קניות">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-512.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:0}</style>
 <title>הקניות של הבית</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -177,6 +182,7 @@ function norm(s){return s.trim().replace(/\s+/g," ").toLowerCase()}
 /* ---------- who am I ---------- */
 function setMe(id){
   me=id; store.set("me",id);
+  try{history.replaceState(null,"",location.pathname+"#"+id)}catch(e){}
   $("meAv").replaceChildren(av(id)); $("meName").textContent=P[id].name;
   $("picker").hidden=true; renderChat(); renderList();
 }
