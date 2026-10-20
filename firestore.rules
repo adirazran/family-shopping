@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // הודעות בשיחה: כל מי שיש לו את הקישור יכול לקרוא ולכתוב
+    match /messages/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.text is string
+                    && request.resource.data.text.size() < 1000;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['added']);
+      allow delete: if false;
+    }
+    // פריטים ברשימה
+    match /items/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.name is string
+                    && request.resource.data.name.size() < 200;
+      allow update, delete: if true;
+    }
+  }
+}
