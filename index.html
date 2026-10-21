@@ -97,7 +97,8 @@ h1{font-family:var(--display);font-weight:400;font-size:1.7rem;margin:0;color:va
 .sheet{position:fixed;inset:0;background:rgba(29,42,31,.35);z-index:25;display:flex;align-items:flex-end;justify-content:center}
 .sheet .panel{background:var(--surface);width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:20px max(16px,env(safe-area-inset-left,0px)) calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
 .sheet h3{margin:0;font-family:var(--display);font-weight:400;font-size:1.4rem;color:var(--leaf)}
-.emos{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.emos{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;max-height:46vh;overflow-y:auto;padding:2px}
+.emohead{grid-column:1/-1;font-weight:700;color:var(--muted);font-size:.95rem;margin-top:6px}
 .emos button{font-size:1.9rem;background:var(--sunk);border:2px solid transparent;border-radius:14px;aspect-ratio:1;padding:0}
 .emos button.sel{border-color:var(--leaf);background:var(--leaf-soft)}
 .sheet-actions{display:flex;gap:8px;flex-wrap:wrap}
@@ -192,7 +193,8 @@ const PEOPLE = [
 ];
 // Common Israeli supermarket items, used for suggestions before the family builds its own history
 const COMMON = ["חלב","לחם","ביצים","מלפפונים","עגבניות","בצל","תפוחי אדמה","גמבה","גזר","חסה","לימונים","שום","תפוחים","בננות","אבוקדו","קוטג׳","גבינה צהובה","גבינה לבנה","שמנת מתוקה","שמנת חמוצה","יוגורט","חמאה","מעדנים","נקניק","פסטרמה","חזה עוף","שניצל","בשר טחון","פרגיות","דג סלמון","טונה","אורז","פסטה","קמח","סוכר","מלח","שמן קנולה","שמן זית","קטשופ","מיונז","חומוס","טחינה","פיתות","לחמניות","פתיתים","קורנפלקס","שוקו","קפה","תה","מים מינרליים","קולה","מיץ","במבה","ביסלי","עוגיות","שוקולד","גלידה","נייר טואלט","מגבות נייר","סבון כלים","אבקת כביסה","מרכך כביסה","שקיות זבל","שמפו","משחת שיניים","תירס","זיתים","מלפפון חמוץ","חציל","קישואים","פטרוזיליה","כוסברה","שמיר"];
-const AVATARS=["🦁","🐼","🦊","🐯","🐨","🐸","🐵","🦄","🐶","🐱","🐰","🐻","🐧","🦖","🐙","🦋","⚽","🏀","🎮","🎸","🌸","🌈","⭐","🍕","🍦","🚀","👑","😎","🤖","👻"];
+const AVATAR_GROUPS=[["חיות", ["🦁", "🐼", "🦊", "🐯", "🐨", "🐸", "🐵", "🙈", "🐶", "🐱", "🐰", "🐻", "🐧", "🦖", "🦕", "🐙", "🦋", "🐢", "🦈", "🐬", "🐳", "🦒", "🦓", "🐘", "🦛", "🦔", "🦥", "🦦", "🦩", "🦉", "🦜", "🐝", "🐞", "🐌", "🦄", "🐲", "🐷", "🐮", "🐔", "🐣", "🦀", "🐊"]], ["דמויות", ["🧙", "🧛", "🧜", "🧚", "🧞", "🧟", "🦸", "🦹", "🥷", "🤴", "👸", "🤶", "🎅", "👼", "🧑‍🚀", "👮", "🕵", "🧑‍🍳", "🧑‍🎤", "👷", "💂", "🤠", "🧝", "🧌", "🎃", "🤺", "🏄", "🧘"]], ["פרצופים מצחיקים", ["😎", "🤓", "🥸", "🤪", "😜", "🤡", "👻", "💀", "👽", "👾", "🤖", "💩", "😈", "🙃", "🤩", "🥳", "😴", "🤯", "🥶", "🫠", "🤑", "🤗", "😺", "🙀", "😹", "🤫", "🫡", "😇"]], ["אוכל", ["🍕", "🍔", "🌭", "🍟", "🌮", "🍩", "🍦", "🍪", "🧁", "🍉", "🍓", "🥑", "🌶️", "🍿", "🥨", "🧀", "🍣", "🥐"]], ["ספורט ועוד", ["⚽", "🏀", "🎾", "🏓", "🎮", "🎸", "🥁", "🎨", "🚀", "🛸", "🌈", "⭐", "🔥", "⚡", "👑", "💎", "🎈", "🌸", "🌵", "🍀", "🦷", "🧠"]]];
+const AVATARS=AVATAR_GROUPS.flatMap(g=>g[1]);
 // emoji per item: first matching keyword wins
 const EMO=[["מלפפון חמוץ","🥒"],["מלפפון","🥒"],["עגבני","🍅"],["תפוחי אדמה","🥔"],["תפוח אדמה","🥔"],["בטטה","🍠"],["תפוח","🍎"],["בננ","🍌"],["אבוקדו","🥑"],["לימון","🍋"],["תפוז","🍊"],["קלמנטינ","🍊"],["ענב","🍇"],["אבטיח","🍉"],["מלון","🍈"],["אגס","🍐"],["אפרסק","🍑"],["דובדבן","🍒"],["אננס","🍍"],["מנגו","🥭"],["גזר","🥕"],["בצל","🧅"],["שום","🧄"],["גמבה","🫑"],["פלפל","🌶️"],["חציל","🍆"],["תירס","🌽"],["חסה","🥬"],["כרוב","🥬"],["ברוקולי","🥦"],["פטרי","🍄"],["פטרוזיליה","🌿"],["כוסברה","🌿"],["שמיר","🌿"],["נענע","🌿"],["זית","🫒"],["חלב","🥛"],["שוקו","🧋"],["גבינ","🧀"],["קוטג","🧀"],["יוגורט","🥣"],["מעדנ","🍮"],["חמאה","🧈"],["ביצ","🥚"],["לחמני","🥯"],["לחם","🍞"],["פית","🫓"],["תות","🍓"],["באגט","🥖"],["קרואסון","🥐"],["עוף","🍗"],["פרגי","🍗"],["שניצל","🍗"],["נקניק","🌭"],["פסטרמה","🥓"],["בשר","🥩"],["סטייק","🥩"],["המבורגר","🍔"],["דגני","🥣"],["דג","🐟"],["סלמון","🐟"],["טונה","🐟"],["אורז","🍚"],["פסט","🍝"],["ספגטי","🍝"],["פתיתים","🍚"],["קמח","🌾"],["סוכר","🍬"],["מלח","🧂"],["שמן","🫗"],["קטשופ","🍅"],["חומוס","🫘"],["טחינה","🥣"],["דבש","🍯"],["ריבה","🍓"],["קורנפלקס","🥣"],["קפה","☕"],["תה","🍵"],["מים","💧"],["קולה","🥤"],["מיץ","🧃"],["ביר","🍺"],["יין","🍷"],["במבה","🥜"],["ביסלי","🥨"],["צ׳יפס","🍟"],["צ'יפס","🍟"],["עוגי","🍪"],["עוגה","🍰"],["שוקולד","🍫"],["ממתק","🍬"],["סוכרי","🍭"],["גלידה","🍦"],["פיצה","🍕"],["נייר טואלט","🧻"],["מגבות","🧻"],["טישו","🧻"],["סבון","🧼"],["כביסה","🧺"],["מרכך","🧺"],["שקיות","🛍️"],["שמפו","🧴"],["משחת שיניים","🪥"],["מברשת","🪥"],["חיתול","👶"],["סוללה","🔋"],["נורה","💡"],["אוכל לכלב","🐶"],["אוכל לחתול","🐱"],["פרחים","💐"],["תבלין","🧂"]];
 const FIN={"ן":"נ","ם":"מ","ץ":"צ","ף":"פ","ך":"כ","׳":"'"};
@@ -241,9 +243,10 @@ function refreshMe(){if(!me)return;$("meAv").replaceChildren(av(me));$("meName")
 function openSheet(){
   $("sheetTitle").textContent="האווטאר של "+P[me].name;
   const box=$("emos");box.replaceChildren();const cur=(profiles[me]||{}).emoji;
-  AVATARS.forEach(e=>{const b=document.createElement("button");b.type="button";b.textContent=e;b.setAttribute("aria-label","אווטאר "+e);if(e===cur)b.className="sel";
-    b.onclick=async()=>{profiles[me]={emoji:e};refreshMe();render();openSheet();
-      try{await db.collection("profiles").doc(me).set({emoji:e},{merge:true})}catch(err){toast("לא נשמר, נסו שוב")}};box.append(b)});
+  AVATAR_GROUPS.forEach(([title,list])=>{const h=document.createElement("div");h.className="emohead";h.textContent=title;box.append(h);
+  list.forEach(e=>{const b=document.createElement("button");b.type="button";b.textContent=e;b.setAttribute("aria-label","אווטאר "+e);if(e===cur)b.className="sel";
+    b.onclick=async()=>{const sc=box.scrollTop;profiles[me]={...(profiles[me]||{}),emoji:e};refreshMe();render();openSheet();$("emos").scrollTop=sc;
+      try{await db.collection("profiles").doc(me).set({emoji:e},{merge:true})}catch(err){toast("לא נשמר, נסו שוב")}};box.append(b)})});
   const [bd,bm]=((profiles[me]||{}).bday||"-").split("-");
   const D=$("bdD"),M=$("bdM");
   D.innerHTML='<option value="">יום</option>'+Array.from({length:31},(_,k)=>'<option>'+String(k+1).padStart(2,"0")+'</option>').join("");
