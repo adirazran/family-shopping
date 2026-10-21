@@ -787,7 +787,9 @@ async function toggle(i){
   try{await db.collection("items").doc(i.id).update(i.done?{done:false,doneBy:null,doneAt:null}:{done:true,doneBy:me,doneAt:Date.now()})}catch(e){toast("לא נשמר, נסו שוב")}}
 async function removeItem(i){
   const el=document.querySelector('.item[data-id="'+i.id+'"]');
-  if(el&&!matchMedia("(prefers-reduced-motion: reduce)").matches){try{await throwToBin(el)}catch(e){}}
+  // quick fade-out instead of the trash-can animation
+  const row=el&&(el.closest(".sw")||el);
+  if(row&&row.animate&&!matchMedia("(prefers-reduced-motion: reduce)").matches){try{await row.animate([{opacity:1},{opacity:0}],{duration:160,fill:"forwards"}).finished}catch(e){}}
   try{await db.collection("items").doc(i.id).delete()}catch(e){toast("לא נמחק, נסו שוב")}
 }
 function thud(){if(muted)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t=actx.currentTime;
@@ -838,7 +840,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 setInterval(()=>{if(document.visibilityState==="visible")nextTag()},30*1000); // and every 30 seconds while open
 
 /* ---------- auto-update: phones pick up a new version without reinstalling ---------- */
-const APP_VERSION="20261021152757";
+const APP_VERSION="20261021152824";
 async function checkUpdate(){
   try{
     const t=await (await fetch(location.pathname+"?check="+Date.now(),{cache:"no-store"})).text();
