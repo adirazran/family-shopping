@@ -463,6 +463,24 @@ function deptOf(name){const n=fin(name);
   let best=null,len=0;DEPTS.forEach(([d,ks])=>ks.forEach(k=>{const f=fin(k);if(n.includes(f)&&f.length>len){best=d;len=f.length}}));
   return best||OTHER}
 
+/* ---------- a small sweet burst when adding fruit or sweets ---------- */
+const SWEET=["שוקולד","ממתק","סוכרי","עוגי","עוגה","עוגת","וופל","ופלים","גלידה","ארטיק","קרמבו","מרשמלו","דובונים","קינדר","נוטלה","דבש","ריבה","סופגני","מקופלת","פסק זמן","כיף כף","טורטית","פודינג","מעדנ",
+  "תפוח","בננ","ענב","אבטיח","מלון","תות","אגס","אפרסק","דובדבן","אננס","מנגו","תפוז","קלמנטינ","קיווי","רימון","תמר","שזיפ","משמש","פירות","ליצ׳י","פסיפלורה"];
+function isSweet(name){const n=fin(name);if(n.includes(fin("תפוחי אדמה"))||n.includes(fin("תפוח אדמה")))return false;return SWEET.some(k=>n.includes(fin(k)))}
+function sweetBurst(name){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const icon=emojiFor(name),pool=[icon,icon,icon,"✨","💖"];
+  const box=document.querySelector(".composer").getBoundingClientRect();
+  for(let k=0;k<7;k++){
+    const e=document.createElement("span");e.textContent=pool[k%pool.length];
+    e.style.cssText="position:fixed;z-index:45;pointer-events:none;font-size:"+(1.2+Math.random()*.8)+"rem;left:"+(box.left+box.width*(.25+Math.random()*.5))+"px;top:"+(box.top-10)+"px";
+    document.body.append(e);
+    const dx=(Math.random()-.5)*120,dy=-(160+Math.random()*140),rot=(Math.random()-.5)*60;
+    e.animate([{transform:"translate(0,0) scale(.6)",opacity:0},{transform:`translate(${dx*.4}px,${dy*.4}px) scale(1)`,opacity:1,offset:.25},{transform:`translate(${dx}px,${dy}px) rotate(${rot}deg) scale(.9)`,opacity:0}],
+      {duration:1100+Math.random()*400,delay:k*60,easing:"ease-out",fill:"forwards"}).finished.then(()=>e.remove(),()=>e.remove());
+  }
+}
+
 /* ---------- nonsense index 😈 ---------- */
 const JUNK=["במבה","ביסלי","צ׳יפס","צ'יפס","ציפס","תפוצ","דוריטוס","שוקולד","ממתק","סוכרי","גלידה","ארטיק","עוגי","עוגה","עוגת","וופל","ופלים","חטיף","מסטיק","פופקורן","דובונים","קינדר","מרשמלו","אפרופו","קולה","ספרייט","פאנטה","משקה אנרגיה","רד בול","בירה","בירות","יין","וודקה","ערק","סופגני","קרמבו","פסק זמן","כיף כף","מקופלת","טורטית","שוגי","נוטלה","פרינגלס","גומי"];
 function isJunk(name){const n=fin(name);return JUNK.some(k=>n.includes(fin(k)))}
@@ -775,6 +793,7 @@ async function addText(text){
     }catch(e){toast("לא הצלחתי להוסיף את "+name)}
   }
   if(names.length) toast("נוסף: "+names.join(", "));
+  const sweet=names.find(isSweet);if(sweet)sweetBurst(sweet);
 }
 async function toggle(i){
   if(!i.done){
@@ -840,7 +859,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 setInterval(()=>{if(document.visibilityState==="visible")nextTag()},30*1000); // and every 30 seconds while open
 
 /* ---------- auto-update: phones pick up a new version without reinstalling ---------- */
-const APP_VERSION="20261021152824";
+const APP_VERSION="20261021152921";
 async function checkUpdate(){
   try{
     const t=await (await fetch(location.pathname+"?check="+Date.now(),{cache:"no-store"})).text();
