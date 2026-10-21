@@ -32,15 +32,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--leaf);outline-o
 .app{height:100%;display:flex;flex-direction:column;max-width:720px;margin:0 auto}
 .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 
-header{padding-block:14px;background:var(--surface);border-bottom:1px solid var(--line)}
+header{padding-block:6px 8px;background:var(--surface);border-bottom:1px solid var(--line)}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px}
-h1{font-family:var(--display);font-weight:400;font-size:clamp(1.25rem,6vw,1.7rem);white-space:nowrap;margin:0;color:var(--leaf);display:flex;align-items:center;gap:10px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(1.15rem,5.2vw,1.45rem);white-space:nowrap;margin:0;color:var(--leaf);display:flex;align-items:center;gap:10px}
 .count{background:var(--tomato);color:#fff;border-radius:999px;font-family:var(--body);font-weight:700;font-size:.8rem;min-width:24px;padding:2px 8px;text-align:center;font-variant-numeric:tabular-nums}
-.me{display:flex;align-items:center;gap:8px;background:var(--sunk);border:0;border-radius:999px;padding:4px 12px 4px 4px;font-weight:600}
-.mute{border:0;background:var(--sunk);border-radius:999px;width:42px;height:42px;font-size:1.25rem;padding:0}
-.av{width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;font-weight:700;font-size:.85rem;color:#fff;flex:none}
+.me{display:flex;align-items:center;gap:6px;background:var(--sunk);border:0;border-radius:999px;padding:2px 10px 2px 2px;font-weight:600;font-size:.95rem}
+.mute{border:0;background:var(--sunk);border-radius:999px;width:34px;height:34px;font-size:1rem;padding:0}
+.av{width:30px;height:30px;border-radius:50%;display:inline-grid;place-items:center;font-weight:700;font-size:.85rem;color:#fff;flex:none}
 
-.pane{flex:1;overflow-y:auto;padding-block:16px}
+.pane{flex:1;overflow-y:auto;padding-block:10px}
 .empty{text-align:center;color:var(--muted);padding:48px 16px;line-height:1.6}
 .empty strong{display:block;font-family:var(--display);font-weight:400;font-size:1.2rem;color:var(--fg);margin-bottom:4px}
 
@@ -92,10 +92,12 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.25rem,6vw,1.7rem
 @keyframes flash{0%{background:var(--leaf-soft)}100%{background:var(--surface)}}
 .check.pop{animation:pop .35s ease-out}
 .item.flash{animation:flash .6s ease-out}
-.king{display:flex;align-items:center;gap:12px;background:linear-gradient(90deg,#fff6d8,#fffbee);border:1px solid #f1dc94;border-radius:14px;padding:12px 14px;margin-bottom:14px}
-.king .crown{font-size:2rem;line-height:1}
-.king b{font-size:1.1rem}
-.king small{display:block;color:var(--muted);font-size:.9rem;margin-top:2px}
+.king{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#fff6d8,#fffbee);border:1px solid #f1dc94;border-radius:12px;padding:5px 10px;margin-bottom:8px;min-width:0}
+.king .crown{font-size:1.2rem;line-height:1}
+.king>div{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.95rem}
+.king b{font-size:.95rem}
+.king small{color:var(--muted);font-size:.85rem}
+.king small::before{content:" · "}
 .sheet{position:fixed;inset:0;background:rgba(29,42,31,.35);z-index:25;display:flex;align-items:flex-end;justify-content:center}
 .sheet .panel{background:var(--surface);width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:20px max(16px,env(safe-area-inset-left,0px)) calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
 .sheet h3{margin:0;font-family:var(--display);font-weight:400;font-size:1.4rem;color:var(--leaf)}
@@ -114,10 +116,10 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.25rem,6vw,1.7rem
 .likes{display:inline-block;margin-inline-start:6px;font-size:.95rem;color:var(--tomato);font-weight:700}
 @keyframes heart{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}100%{transform:translate(-50%,-120%) scale(1.8);opacity:0}}
 .bigheart{position:fixed;font-size:3rem;pointer-events:none;z-index:45;animation:heart .8s ease-out forwards}
-.shop{display:flex;align-items:center;gap:10px;background:#e8f1ff;border:1px solid #b8cff5;border-radius:14px;padding:10px 14px;margin-bottom:14px;font-weight:700}
+.shop{display:flex;align-items:center;gap:8px;background:#e8f1ff;border:1px solid #b8cff5;border-radius:12px;padding:5px 10px;margin-bottom:8px;font-weight:700;font-size:.95rem}
 .shop .t{flex:1;min-width:0}
-.shop small{display:block;font-weight:400;color:var(--muted);font-size:.88rem}
-.shop button{border:0;background:#2563eb;color:#fff;border-radius:999px;padding:8px 14px;font-weight:700;flex:none}
+.shop small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+.shop button{border:0;background:#2563eb;color:#fff;border-radius:999px;padding:6px 12px;font-weight:700;flex:none;font-size:.9rem}
 .shopbtn{border:1px solid #b8cff5;background:#e8f1ff;color:#1d4ed8;border-radius:999px;padding:8px 14px;font-weight:700;width:100%;margin-bottom:14px}
 .bday{background:linear-gradient(90deg,#ffe4ef,#fff1d6);border:1px solid #f6b8cf;border-radius:14px;padding:12px 14px;margin-bottom:14px;font-weight:700;font-size:1.15rem;text-align:center}
 .bdayrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -133,15 +135,15 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.25rem,6vw,1.7rem
 .rbar{position:fixed;z-index:46;display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 8px;box-shadow:0 8px 24px rgba(0,0,0,.15)}
 .rbar button{border:0;background:none;font-size:1.7rem;padding:2px 4px;border-radius:999px;line-height:1}
 .rbar button.sel{background:var(--leaf-soft)}
-.swhint{font-size:.85rem;color:var(--muted);text-align:center;margin:-4px 0 10px}
+.swhint{font-size:.8rem;color:var(--muted);text-align:center;margin:0 0 6px}
 .junk{margin-inline-start:6px;font-size:1rem}
-.bet{background:#f0f7ee;border:1px solid #c9e2c4;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px}
-.bet h4{margin:0;font-size:1.1rem}
+.bet{background:#f0f7ee;border:1px solid #c9e2c4;border-radius:12px;padding:7px 10px;margin-bottom:8px;display:flex;flex-direction:column;gap:5px}
+.bet h4{margin:0;font-size:.98rem}
 .bet .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.bet input{width:7.5em;font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
-.bet button{border:0;background:var(--leaf);color:#fff;border-radius:999px;padding:8px 14px;font-weight:700}
+.bet input{width:6.5em;font:inherit;padding:5px 8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.bet button{border:0;background:var(--leaf);color:#fff;border-radius:999px;padding:6px 12px;font-weight:700;font-size:.9rem}
 .bet button.ghost{background:var(--surface);color:var(--fg);border:1px solid var(--line)}
-.bet small{color:var(--muted);font-size:.9rem}
+.bet small{color:var(--muted);font-size:.8rem}
 .bet ol{margin:0;padding-inline-start:1.4em;display:flex;flex-direction:column;gap:2px}
 .statsbtn{display:block;margin:22px auto 6px;border:1px dashed var(--line);background:var(--surface);border-radius:999px;padding:8px 16px;font-weight:700;color:var(--muted)}
 .modal .panel{gap:10px}
@@ -150,12 +152,14 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.25rem,6vw,1.7rem
 .modal li{background:var(--sunk);border-radius:12px;padding:10px 12px;font-size:1.05rem;line-height:1.45}
 .modal .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .modal input{width:7.5em;font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
-.tools{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
-.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:700;font-size:.95rem}
+.tools{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.tools .cnt{margin-inline-start:auto;color:var(--muted);font-weight:700;font-size:.95rem}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-weight:700;font-size:.9rem}
+.chip.shopc{border-color:#b8cff5;background:#e8f1ff;color:#1d4ed8}
 .chip.on{background:var(--leaf);color:#fff;border-color:var(--leaf)}
 .dept{font-weight:700;font-size:1rem;color:var(--leaf);margin:12px 4px 2px}
 .dept:first-child{margin-top:0}
-.tagline{margin:10px 0 2px;background:var(--leaf-soft);color:var(--leaf);border-radius:12px;padding:8px 12px;font-family:var(--display);font-size:1.15rem;line-height:1.4;min-height:1.4em;text-wrap:balance;transition:opacity .4s}
+.tagline{margin:6px 0 0;background:var(--leaf-soft);color:var(--leaf);border-radius:10px;padding:4px 10px;font-family:var(--display);font-size:1rem;line-height:1.35;min-height:1.35em;text-wrap:balance;transition:opacity .4s}
 .ibody.tap{cursor:pointer;border-radius:8px}
 .ibody.tap:active{background:var(--sunk)}
 .edit{display:flex;flex-direction:column;gap:12px}
@@ -394,18 +398,22 @@ function render(){
   };
   const wrap=i=>{const it=mk(i);const sw=document.createElement("div");sw.className="sw";const bg=document.createElement("div");bg.className="bg";
     const L=document.createElement("span"),R=document.createElement("span");bg.append(L,R);sw.append(bg,it);addSwipe(sw,it,bg,L,R,i);return sw};
-  if(open.length){
+  {
     const tools=document.createElement("div");tools.className="tools";
-    const tg=document.createElement("button");tg.type="button";tg.className="chip"+(byDept?" on":"");tg.textContent=byDept?"🗂 לפי מחלקות ✓":"🗂 סידור לפי מחלקות";
-    tg.onclick=()=>{byDept=!byDept;store.set("byDept",byDept?"1":"0");render()};
-    const cnt=document.createElement("span");cnt.style.cssText="color:var(--muted);font-weight:700";cnt.textContent=open.length+" לקנות";
-    tools.append(tg,cnt);box.append(tools);
+    const shopActive=shopping&&shopping.who&&Date.now()-shopping.since<3*3600e3;
+    if(!shopActive){const sb=document.createElement("button");sb.type="button";sb.className="chip shopc";sb.textContent="🛒 יוצא/ת לסופר";sb.onclick=()=>setShopping(true);tools.append(sb)}
+    if(open.length){const tg=document.createElement("button");tg.type="button";tg.className="chip"+(byDept?" on":"");tg.textContent=byDept?"🗂 מחלקות ✓":"🗂 לפי מחלקות";
+      tg.onclick=()=>{byDept=!byDept;store.set("byDept",byDept?"1":"0");render()};tools.append(tg);
+      const cnt=document.createElement("span");cnt.className="cnt";cnt.textContent=open.length+" לקנות";tools.append(cnt)}
+    box.append(tools);
+  }
+  if(open.length){
     const l=document.createElement("div");l.className="list";
     if(byDept){const order=[...DEPTS.map(d=>d[0]),OTHER];const g={};open.forEach(i=>{const d=deptOf(i.name);(g[d]=g[d]||[]).push(i)});
       order.forEach(d=>{if(!g[d])return;const h=document.createElement("div");h.className="dept";h.textContent=d+" ("+g[d].length+")";l.append(h);g[d].forEach(i=>l.append(wrap(i)))})}
     else open.forEach(i=>l.append(wrap(i)));
     box.append(l);
-    if(store.get("swhint")!=="1"){const h=document.createElement("div");h.className="swhint";h.textContent="טיפ: החליקו פריט ימינה ✔ = נקנה · שמאלה 🗑 = מחיקה";box.prepend(h)}}
+    if(store.get("swhint")!=="1"){const h=document.createElement("div");h.className="swhint";h.textContent="טיפ: החליקו פריט ימינה ✔ = נקנה · שמאלה 🗑 = מחיקה";box.insertBefore(h,l)}}
   else{const e=document.createElement("div");e.className="empty";e.innerHTML="<strong>הכול נקנה 🎉</strong>";box.append(e)}
   if(done.length){
     const s=document.createElement("div");s.className="section";
@@ -515,13 +523,13 @@ function renderBet(){
   if(!active&&!has&&!revealed)return;
   if(bet&&bet.actual!=null&&!revealed&&!active)return;
   const c=document.createElement("div");c.className="bet";
-  const h=document.createElement("h4");h.textContent="💰 הימור על החשבון";c.append(h);
+  const h=document.createElement("h4");h.textContent="💰 הימור על החשבון · הכי קרוב = שר האוצר 👑";c.append(h);
   if(revealed){
     const ranked=Object.entries(g).sort((a,b)=>Math.abs(a[1]-bet.actual)-Math.abs(b[1]-bet.actual));
     const t=document.createElement("div");t.textContent="יצא בקופה: ₪"+bet.actual+". שר האוצר: "+nmA(bet.winner)+" 👑";t.style.fontWeight="700";c.append(t);
     const ol=document.createElement("ol");ranked.forEach(([p,v])=>{const x=document.createElement("li");x.textContent=nmA(p)+": ₪"+v+" (פער "+Math.round(Math.abs(v-bet.actual))+")";ol.append(x)});c.append(ol);
   }else{
-    const sm=document.createElement("small");sm.textContent="כל אחד מנחש כמה תעלה הקנייה. הכי קרוב מקבל את התואר ״שר האוצר״ 👑";c.append(sm);
+    const sm=document.createElement("small");
     const row=document.createElement("div");row.className="row";
     const inp=document.createElement("input");inp.type="number";inp.inputMode="decimal";inp.placeholder="₪";inp.id="myGuess";inp.setAttribute("aria-label","הניחוש שלי בשקלים");if(g[me])inp.value=g[me];
     const b=document.createElement("button");b.textContent=g[me]?"עדכון ניחוש":"הניחוש שלי";
@@ -655,10 +663,10 @@ let shopping=null;
 function renderShop(){
   const box=$("shop");box.replaceChildren();
   const active=shopping&&shopping.who&&Date.now()-shopping.since<3*3600e3;
-  if(!active){const b=document.createElement("button");b.className="shopbtn";b.textContent="🛒 אני יוצא/ת לסופר";b.onclick=()=>setShopping(true);box.append(b);return}
+  if(!active)return; // the "going to the store" chip lives in the tools row
   const mine=shopping.who===me;
   const w=document.createElement("div");w.className="shop";
-  const ic=document.createElement("span");ic.textContent="🛒";ic.style.fontSize="1.6rem";
+  const ic=document.createElement("span");ic.textContent="🛒";ic.style.fontSize="1.2rem";
   const t=document.createElement("div");t.className="t";
   const mins=Math.max(1,Math.round((Date.now()-shopping.since)/60000));
   t.textContent=mine?"את/ה בסופר עכשיו":nmA(shopping.who)+" בסופר עכשיו!";
@@ -830,7 +838,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 setInterval(()=>{if(document.visibilityState==="visible")nextTag()},30*1000); // and every 30 seconds while open
 
 /* ---------- auto-update: phones pick up a new version without reinstalling ---------- */
-const APP_VERSION="20261021104213";
+const APP_VERSION="20261021121934";
 async function checkUpdate(){
   try{
     const t=await (await fetch(location.pathname+"?check="+Date.now(),{cache:"no-store"})).text();
@@ -856,7 +864,7 @@ try{
     all=s.docs.map(d=>({id:d.id,...d.data()}));render();
     if(!statsChecked){statsChecked=true;setTimeout(maybeAutoStats,1500)}
   },()=>offline("אין חיבור לרשימה – בדקו אינטרנט ורעננו"));
-  db.collection("status").doc("shopping").onSnapshot(d=>{shopping=d.exists?d.data():null;renderShop();renderBet()},()=>{});
+  db.collection("status").doc("shopping").onSnapshot(d=>{shopping=d.exists?d.data():null;render()},()=>{});
   db.collection("bets").doc("current").onSnapshot(d=>{bet=d.exists?d.data():null;const f=document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#bet");if(!f)renderBet()},()=>{});
   db.collection("bets").doc("score").onSnapshot(d=>{betScore=(d.exists&&d.data().counts)||{};renderBet()},()=>{});
 
