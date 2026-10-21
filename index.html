@@ -121,6 +121,8 @@ h1{font-family:var(--display);font-weight:400;font-size:1.7rem;margin:0;color:va
 .bdayrow select{font:inherit;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
 @keyframes rise{0%{transform:translateY(0)}100%{transform:translateY(-120vh)}}
 .balloon{position:fixed;bottom:-80px;font-size:3rem;pointer-events:none;z-index:40;animation:rise linear forwards}
+.bin{position:fixed;left:max(22px,env(safe-area-inset-left,0px));bottom:calc(150px + env(safe-area-inset-bottom,0px));font-size:3.4rem;line-height:1;z-index:49;pointer-events:none}
+.flyer{position:fixed;margin:0;z-index:50;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.18)}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:40}
 .banner{background:var(--tomato);color:#fff;padding:8px;text-align:center;font-weight:600;font-size:.9rem}
 </style>
@@ -461,7 +463,35 @@ async function toggle(i){
     await new Promise(r=>setTimeout(r,280));
   }
   try{await db.collection("items").doc(i.id).update(i.done?{done:false,doneBy:null,doneAt:null}:{done:true,doneBy:me,doneAt:Date.now()})}catch(e){toast("לא נשמר, נסו שוב")}}
-async function removeItem(i){try{await db.collection("items").doc(i.id).delete()}catch(e){toast("לא נמחק, נסו שוב")}}
+async function removeItem(i){
+  const el=document.querySelector('.item[data-id="'+i.id+'"]');
+  if(el&&!matchMedia("(prefers-reduced-motion: reduce)").matches){try{await throwToBin(el)}catch(e){}}
+  try{await db.collection("items").doc(i.id).delete()}catch(e){toast("לא נמחק, נסו שוב")}
+}
+function thud(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t=actx.currentTime;
+  const o=actx.createOscillator(),g=actx.createGain();o.type="square";o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(45,t+.18);
+  g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.23);
+  const n=actx.createBufferSource(),b=actx.createBuffer(1,actx.sampleRate*.12,actx.sampleRate),d=b.getChannelData(0);
+  for(let k=0;k<d.length;k++)d[k]=(Math.random()*2-1)*(1-k/d.length);
+  const ng=actx.createGain();ng.gain.value=.12;n.buffer=b;n.connect(ng).connect(actx.destination);n.start(t)}catch(e){}}
+async function throwToBin(el){
+  const r=el.getBoundingClientRect();
+  const bin=document.createElement("div");bin.className="bin";bin.textContent="🗑️";document.body.append(bin);
+  const fl=el.cloneNode(true);fl.classList.add("flyer");
+  Object.assign(fl.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});
+  document.body.append(fl);el.style.visibility="hidden";
+  await bin.animate([{transform:"scale(0) rotate(-20deg)"},{transform:"scale(1.15) rotate(5deg)"},{transform:"scale(1)"}],{duration:220,easing:"ease-out",fill:"forwards"}).finished;
+  const b=bin.getBoundingClientRect();
+  const dx=(b.left+b.width/2)-(r.left+r.width/2), dy=(b.top+b.height/2)-(r.top+r.height/2);
+  await fl.animate([
+    {transform:"translate(0,0) rotate(0) scale(1)",opacity:1},
+    {transform:`translate(${dx*.45}px,${dy*.45-140}px) rotate(-200deg) scale(.45)`,opacity:1,offset:.5},
+    {transform:`translate(${dx}px,${dy}px) rotate(-400deg) scale(.08)`,opacity:.7}
+  ],{duration:620,easing:"cubic-bezier(.35,.0,.65,1)",fill:"forwards"}).finished;
+  fl.remove();thud();
+  await bin.animate([{transform:"rotate(0)"},{transform:"rotate(-14deg)"},{transform:"rotate(12deg)"},{transform:"rotate(-6deg)"},{transform:"rotate(0)"}],{duration:380}).finished;
+  bin.animate([{opacity:1},{opacity:0,transform:"translateY(20px)"}],{duration:250,fill:"forwards"}).finished.then(()=>bin.remove());
+}
 async function archiveDone(list){for(const i of list){try{await db.collection("items").doc(i.id).update({archived:true,archivedAt:Date.now()})}catch(e){}}toast("הרשימה נוקתה")}
 
 /* ---------- input ---------- */
