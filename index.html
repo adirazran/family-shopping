@@ -37,6 +37,7 @@ header{padding-block:14px;background:var(--surface);border-bottom:1px solid var(
 h1{font-family:var(--display);font-weight:400;font-size:1.7rem;margin:0;color:var(--leaf);display:flex;align-items:center;gap:10px}
 .count{background:var(--tomato);color:#fff;border-radius:999px;font-family:var(--body);font-weight:700;font-size:.8rem;min-width:24px;padding:2px 8px;text-align:center;font-variant-numeric:tabular-nums}
 .me{display:flex;align-items:center;gap:8px;background:var(--sunk);border:0;border-radius:999px;padding:4px 12px 4px 4px;font-weight:600}
+.mute{border:0;background:var(--sunk);border-radius:999px;width:42px;height:42px;font-size:1.25rem;padding:0}
 .av{width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;font-weight:700;font-size:.85rem;color:#fff;flex:none}
 
 .pane{flex:1;overflow-y:auto;padding-block:16px}
@@ -85,7 +86,7 @@ h1{font-family:var(--display);font-weight:400;font-size:1.7rem;margin:0;color:va
 .av.emo{background:var(--sunk)!important;font-size:1.25rem}
 .emoji{font-size:1.4rem;width:30px;text-align:center;flex:none}
 .item.done .emoji{opacity:.5}
-@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
 @keyframes flash{0%{background:var(--leaf-soft)}100%{background:var(--surface)}}
 .check.pop{animation:pop .35s ease-out}
 .item.flash{animation:flash .6s ease-out}
@@ -133,7 +134,7 @@ h1{font-family:var(--display);font-weight:400;font-size:1.7rem;margin:0;color:va
   <header class="wrap">
     <div class="top">
       <h1>הקניות של הבית <span class="count" id="count" hidden>0</span></h1>
-      <button class="me" id="meBtn" title="החלפת משתמש"><span id="meAv"></span><span id="meName"></span></button>
+      <div style="display:flex;gap:8px;align-items:center"><button class="mute" id="muteBtn" type="button" aria-label="השתקה"></button><button class="me" id="meBtn" title="החלפת משתמש"><span id="meAv"></span><span id="meName"></span></button></div>
     </div>
   </header>
 
@@ -253,6 +254,8 @@ function openSheet(){
   D.onchange=save;M.onchange=save;
   $("sheet").hidden=false;
 }
+function drawMute(){$("muteBtn").textContent=muted?"🔇":"🔈";$("muteBtn").setAttribute("aria-label",muted?"הפעלת צלילים":"השתקת צלילים")}
+$("muteBtn").onclick=()=>{muted=!muted;store.set("muted",muted?"1":"0");drawMute();toast(muted?"הצלילים כבויים 🔇":"הצלילים פועלים 🔈")};
 $("meBtn").onclick=()=>me?openSheet():showPicker();
 $("closeSheet").onclick=()=>$("sheet").hidden=true;
 $("sheet").onclick=e=>{if(e.target.id==="sheet")$("sheet").hidden=true};
@@ -317,9 +320,10 @@ function render(){
 }
 
 /* ---------- king of requests ---------- */
+const KING_FROM=1792561625000; // reset: tests before this moment are not counted
 const MONTHS=["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 function renderKing(){
-  const box=$("king"),now=new Date(),start=new Date(now.getFullYear(),now.getMonth(),1).getTime();
+  const box=$("king"),now=new Date(),start=Math.max(new Date(now.getFullYear(),now.getMonth(),1).getTime(),KING_FROM);
   const counts={},per={};
   all.filter(i=>i.createdAt>=start).forEach(i=>(i.requesters||[]).forEach(r=>{
     counts[r]=(counts[r]||0)+1;per[r]=per[r]||{};const k=norm(i.name);per[r][k]=(per[r][k]||0)+1}));
@@ -386,12 +390,12 @@ function renderBday(){
 }
 
 /* ---------- pop sound + confetti ---------- */
-let actx=null;
-function pop(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
-  o.type="sine";o.frequency.setValueAtTime(880,t);o.frequency.exponentialRampToValueAtTime(1500,t+.08);
-  g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+.15);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.16)}catch(e){}}
-function tada(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[523,659,784,1047].forEach((f,k)=>{const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime+k*.11;
-  o.type="triangle";o.frequency.value=f;g.gain.setValueAtTime(.2,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.36)})}catch(e){}}
+let actx=null, muted=store.get("muted")==="1";
+function pop(){if(muted)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+  o.type="sine";o.frequency.setValueAtTime(660,t);o.frequency.exponentialRampToValueAtTime(880,t+.06);
+  g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.001,t+.1);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.16)}catch(e){}}
+function tada(){if(muted)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[523,659,784,1047].forEach((f,k)=>{const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime+k*.11;
+  o.type="triangle";o.frequency.value=f;g.gain.setValueAtTime(.05,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.36)})}catch(e){}}
 function confetti(){
   if(matchMedia("(prefers-reduced-motion: reduce)").matches){toast("כל הכבוד! הכול נקנה 🎉");return}
   const cv=$("confetti"),ctx=cv.getContext("2d");cv.hidden=false;cv.width=innerWidth;cv.height=innerHeight;
@@ -468,12 +472,12 @@ async function removeItem(i){
   if(el&&!matchMedia("(prefers-reduced-motion: reduce)").matches){try{await throwToBin(el)}catch(e){}}
   try{await db.collection("items").doc(i.id).delete()}catch(e){toast("לא נמחק, נסו שוב")}
 }
-function thud(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t=actx.currentTime;
+function thud(){if(muted)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t=actx.currentTime;
   const o=actx.createOscillator(),g=actx.createGain();o.type="square";o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(45,t+.18);
-  g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.23);
+  g.gain.setValueAtTime(.05,t);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.23);
   const n=actx.createBufferSource(),b=actx.createBuffer(1,actx.sampleRate*.12,actx.sampleRate),d=b.getChannelData(0);
   for(let k=0;k<d.length;k++)d[k]=(Math.random()*2-1)*(1-k/d.length);
-  const ng=actx.createGain();ng.gain.value=.12;n.buffer=b;n.connect(ng).connect(actx.destination);n.start(t)}catch(e){}}
+  const ng=actx.createGain();ng.gain.value=.03;n.buffer=b;n.connect(ng).connect(actx.destination);n.start(t)}catch(e){}}
 async function throwToBin(el){
   const r=el.getBoundingClientRect();
   const bin=document.createElement("div");bin.className="bin";bin.textContent="🗑️";document.body.append(bin);
@@ -503,6 +507,7 @@ $("composer").addEventListener("submit",async e=>{
 });
 
 /* ---------- start ---------- */
+drawMute();
 const fromHash=(location.hash||"").slice(1).toLowerCase();
 if(P[fromHash]) setMe(fromHash); else if(P[store.get("me")]) setMe(store.get("me")); else showPicker();
 render();
