@@ -109,7 +109,8 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.15rem,5.2vw,1.45
 .sheet-actions button{flex:1;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:12px;font-weight:700}
 .sheet-actions .primary{background:var(--leaf);color:#fff;border-color:var(--leaf)}
 .item.urgent{border-color:var(--tomato);background:#fff3ef}
-.item.urgent .iname::after{content:" 🔥";}
+.urg{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:4px 9px;font-weight:700;font-size:.82rem;white-space:nowrap}
+.urg.on{background:var(--tomato);border-color:var(--tomato);color:#fff}
 .acts{display:flex;align-items:center;gap:2px;flex:none}
 .ibtn{border:0;background:none;font-size:1.3rem;padding:4px;line-height:1;opacity:.35;filter:grayscale(1)}
 .ibtn.on{opacity:1;filter:none}
@@ -174,6 +175,12 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.15rem,5.2vw,1.45
 .step button:disabled{opacity:.35}
 .sq{min-width:1.8em;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
 .sq.many{color:var(--tomato)}
+.trashhead{display:block;width:100%;margin:18px 0 8px;border:0;background:none;text-align:start;font-weight:700;color:var(--muted);font-size:.95rem;padding:4px 2px}
+.trashrow{display:flex;align-items:center;gap:10px;border:1px dashed var(--line);border-radius:12px;padding:8px 10px;background:var(--bg)}
+.tname{flex:1;min-width:0;color:var(--done);font-weight:600}
+.tname .tn{text-decoration:line-through}
+.tname small{display:block;text-decoration:none;font-weight:400;font-size:.8rem;color:var(--muted)}
+.restore{flex:none;border:1px solid var(--leaf);color:var(--leaf);background:var(--surface);border-radius:999px;padding:5px 12px;font-weight:700;font-size:.9rem}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:40}
 .banner{background:var(--tomato);color:#fff;padding:8px;text-align:center;font-weight:600;font-size:.9rem}
 </style>
@@ -262,6 +269,7 @@ const $ = id => document.getElementById(id);
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
 const pendingQ={},qTimers={};
+let trash=[], trashOpen=store.get("trashOpen")==="1";
 let lastSwipeAt=0, statsChecked=false, byDept=store.get("byDept")==="1";
 let me=null, db=null, all=[], clearArmed=false, profiles={};
 
@@ -387,7 +395,7 @@ function render(){
     if(!i.done){
       const acts=document.createElement("div");acts.className="acts";
       const lb=document.createElement("button");lb.className="ibtn"+(myReact?" on":"");lb.textContent=myReact||"😀";lb.setAttribute("aria-label","תגובה");lb.onclick=e=>{e.stopPropagation();openReacts(i,lb)};
-      const ub=document.createElement("button");ub.className="ibtn"+(i.urgent?" on":"");ub.textContent="🔥";ub.setAttribute("aria-label","דחוף");ub.onclick=()=>urgent(i);
+      const ub=document.createElement("button");ub.className="urg"+(i.urgent?" on":"");ub.textContent=i.urgent?"דחוף!":"דחוף?";ub.setAttribute("aria-label",i.urgent?"בטל דחוף":"סמן כדחוף");ub.onclick=()=>urgent(i);
       acts.append(ub);el.append(acts);
       body.classList.add("tap");body.setAttribute("role","button");body.tabIndex=0;body.setAttribute("aria-label","עריכת "+i.name);
       body.addEventListener("click",()=>{if(Date.now()-lastSwipeAt>400)openEdit(i)});
@@ -424,6 +432,26 @@ function render(){
     s.append(lbl,cl);box.append(s);
     const l=document.createElement("div");l.className="list";done.forEach(i=>l.append(wrap(i)));box.append(l);
   }
+  renderTrash(box);
+}
+function renderTrash(box){
+  const week=Date.now()-7*864e5;
+  const t=trash.filter(i=>(i.deletedAt||0)>=week).sort((a,b)=>(b.deletedAt||0)-(a.deletedAt||0)).slice(0,30);
+  if(!t.length)return;
+  const h=document.createElement("button");h.type="button";h.className="trashhead";
+  h.textContent="🗑 נמחקו לאחרונה ("+t.length+") "+(trashOpen?"▴":"▾");
+  h.onclick=()=>{trashOpen=!trashOpen;store.set("trashOpen",trashOpen?"1":"0");render()};
+  box.append(h);
+  if(!trashOpen)return;
+  const l=document.createElement("div");l.className="list";
+  t.forEach(i=>{
+    const r=document.createElement("div");r.className="trashrow";
+    const n=document.createElement("div");n.className="tname";const tn=document.createElement("span");tn.className="tn";tn.textContent=i.name+(i.qty>1?" ×"+i.qty:"");n.append(tn);
+    const m=document.createElement("small");m.textContent="נמחק ע״י "+nm(i.deletedBy)+" · "+when(i.deletedAt);n.append(m);
+    const b=document.createElement("button");b.type="button";b.className="restore";b.textContent="↩️ החזר";
+    b.onclick=async()=>{try{await db.collection("items").doc(i.id).update({deleted:false,deletedAt:null,deletedBy:null});toast("הוחזר לרשימה: "+i.name)}catch(e){toast("לא הוחזר, נסו שוב")}};
+    r.append(n,b);l.append(r)});
+  box.append(l);
 }
 
 /* ---------- king of requests ---------- */
@@ -673,7 +701,7 @@ async function like(i,e){
   try{await db.collection("items").doc(i.id).update({likes})}catch(err){toast("לא נשמר, נסו שוב")}
 }
 async function urgent(i){
-  try{await db.collection("items").doc(i.id).update({urgent:!i.urgent});if(!i.urgent)toast("🔥 "+i.name+" סומן כדחוף")}catch(err){toast("לא נשמר, נסו שוב")}
+  try{await db.collection("items").doc(i.id).update({urgent:!i.urgent});if(!i.urgent)toast("❗ "+i.name+" סומן כדחוף")}catch(err){toast("לא נשמר, נסו שוב")}
 }
 
 /* ---------- supermarket clock ---------- */
@@ -809,7 +837,8 @@ async function removeItem(i){
   // quick fade-out instead of the trash-can animation
   const row=el&&(el.closest(".sw")||el);
   if(row&&row.animate&&!matchMedia("(prefers-reduced-motion: reduce)").matches){try{await row.animate([{opacity:1},{opacity:0}],{duration:160,fill:"forwards"}).finished}catch(e){}}
-  try{await db.collection("items").doc(i.id).delete()}catch(e){toast("לא נמחק, נסו שוב")}
+  // soft delete: the item moves to "deleted recently" at the bottom and can be restored
+  try{await db.collection("items").doc(i.id).update({deleted:true,deletedAt:Date.now(),deletedBy:me})}catch(e){toast("לא נמחק, נסו שוב")}
 }
 function thud(){if(muted)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t=actx.currentTime;
   // soft paper "swish" (high-passed noise) + a light metallic "tink" as it lands in the can
@@ -859,7 +888,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 setInterval(()=>{if(document.visibilityState==="visible")nextTag()},30*1000); // and every 30 seconds while open
 
 /* ---------- auto-update: phones pick up a new version without reinstalling ---------- */
-const APP_VERSION="20261021152921";
+const APP_VERSION="20261021153247";
 async function checkUpdate(){
   try{
     const t=await (await fetch(location.pathname+"?check="+Date.now(),{cache:"no-store"})).text();
@@ -882,7 +911,8 @@ render();
 try{
   firebase.initializeApp(FIREBASE_CONFIG); db=firebase.firestore();
   db.collection("items").orderBy("createdAt","desc").limit(800).onSnapshot(s=>{
-    all=s.docs.map(d=>({id:d.id,...d.data()}));render();
+    const docs=s.docs.map(d=>({id:d.id,...d.data()}));
+    all=docs.filter(i=>!i.deleted);trash=docs.filter(i=>i.deleted);render();
     if(!statsChecked){statsChecked=true;setTimeout(maybeAutoStats,1500)}
   },()=>offline("אין חיבור לרשימה – בדקו אינטרנט ורעננו"));
   db.collection("status").doc("shopping").onSnapshot(d=>{shopping=d.exists?d.data():null;render()},()=>{});
