@@ -774,7 +774,6 @@ function nextTag(){let k;do{k=Math.floor(Math.random()*TAGLINES.length)}while(k=
 // a new line every time the app is opened or brought back to the screen
 $("tagline").textContent="💬 "+TAGLINES[tagIdx=Math.floor(Math.random()*TAGLINES.length)];
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")nextTag()});
-setInterval(()=>{if(document.visibilityState==="visible")nextTag()},15000); // and keeps changing while open
 
 /* ---------- start ---------- */
 drawMute();
