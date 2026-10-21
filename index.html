@@ -45,23 +45,23 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.15rem,5.2vw,1.45
 .empty strong{display:block;font-family:var(--display);font-weight:400;font-size:1.2rem;color:var(--fg);margin-bottom:4px}
 
 .list{display:flex;flex-direction:column;gap:6px}
-.item{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 14px}
-.check{width:34px;height:34px;border-radius:8px;border:2px solid var(--leaf);background:transparent;flex:none;display:grid;place-items:center;padding:0}
+.item{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.check{width:30px;height:30px;border-radius:8px;border:2px solid var(--leaf);background:transparent;flex:none;display:grid;place-items:center;padding:0}
 .item.done .check{background:var(--leaf);border-color:var(--leaf)}
 .check svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:3;opacity:0}
 .item.done .check svg{opacity:1}
 .ibody{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-.iname{min-width:0;font-weight:700;font-size:1.3rem;overflow-wrap:anywhere}
+.iname{min-width:0;font-weight:700;font-size:1.15rem;line-height:1.3;overflow-wrap:anywhere}
 .qty{color:var(--tomato);font-weight:700;margin-inline-start:6px}
 .item.done .iname{text-decoration:line-through;color:var(--done);font-weight:600}
 .item.done .qty{color:var(--done)}
-.req{font-size:.92rem;color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.req{font-size:.85rem;color:var(--muted);min-width:0;white-space:nowrap}
 .req b{color:var(--fg)}
-.when{display:inline;font-size:.88rem;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
+.when{display:inline;font-size:.82rem;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
 .when::before{content:" · "}
 .new{background:var(--tomato);color:#fff;border-radius:6px;font-size:.8rem;font-weight:700;padding:1px 6px;margin-inline-start:6px;vertical-align:middle}
 .item.done .req{color:var(--done)}
-.del{border:0;background:none;color:var(--muted);font-size:1.7rem;padding:0 6px;line-height:1}
+.del{border:0;background:none;color:var(--muted);font-size:1.5rem;padding:0 4px;line-height:1}
 .del:hover{color:var(--tomato)}
 .section{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:20px 0 8px;font-size:1rem;color:var(--muted);font-weight:700}
 .clear{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:.95rem;font-weight:700}
@@ -168,9 +168,9 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.15rem,5.2vw,1.45
 .qrow button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--sunk);font-size:1.4rem;font-weight:700;line-height:1}
 .qrow output{min-width:2.5em;text-align:center;font-size:1.3rem;font-variant-numeric:tabular-nums}
 .savebtn{border:0;background:var(--leaf);color:#fff;border-radius:999px;padding:13px;font-weight:700;font-size:1.1rem}
-.line2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.line2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0;margin-top:2px}
 .step{display:inline-flex;align-items:center;background:var(--sunk);border-radius:999px;padding:2px;flex:none}
-.step button{width:30px;height:30px;border:0;border-radius:50%;background:var(--surface);font-size:1.15rem;font-weight:700;line-height:1;padding:0;color:var(--fg)}
+.step button{width:26px;height:26px;border:0;border-radius:50%;background:var(--surface);font-size:1.15rem;font-weight:700;line-height:1;padding:0;color:var(--fg)}
 .step button:disabled{opacity:.35}
 .sq{min-width:1.8em;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
 .sq.many{color:var(--tomato)}
@@ -356,7 +356,7 @@ function render(){
     const rc={},who={};
     Object.entries(reacts).forEach(([p,e])=>{rc[e]=(rc[e]||0)+1;(who[e]=who[e]||[]).push(nm(p))});
     likes.filter(p=>!reacts[p]).forEach(p=>{rc["❤️"]=(rc["❤️"]||0)+1;(who["❤️"]=who["❤️"]||[]).push(nm(p))});
-    if(Object.keys(rc).length){const lk=document.createElement("span");lk.className="likes";
+    if(false&&Object.keys(rc).length){const lk=document.createElement("span");lk.className="likes";
       lk.textContent=Object.entries(rc).sort((a,b)=>b[1]-a[1]).map(([e,c])=>c>1?e+c:e).join(" ");
       lk.title=Object.entries(who).map(([e,ns])=>e+" "+ns.join(", ")).join(" · ");n.append(lk)}
     if(isJunk(i.name)){const jk=document.createElement("span");jk.className="junk";jk.textContent="😈";jk.title="מדד החרטא: לא חיוני";n.append(jk)}
@@ -383,12 +383,12 @@ function render(){
       const line=document.createElement("div");line.className="line2";line.append(st,r);
       body.append(n,line);
     }else body.append(n,r);
-    el.append(c,em,body);el.dataset.id=i.id;
+    el.append(c,body);el.dataset.id=i.id;
     if(!i.done){
       const acts=document.createElement("div");acts.className="acts";
       const lb=document.createElement("button");lb.className="ibtn"+(myReact?" on":"");lb.textContent=myReact||"😀";lb.setAttribute("aria-label","תגובה");lb.onclick=e=>{e.stopPropagation();openReacts(i,lb)};
       const ub=document.createElement("button");ub.className="ibtn"+(i.urgent?" on":"");ub.textContent="🔥";ub.setAttribute("aria-label","דחוף");ub.onclick=()=>urgent(i);
-      acts.append(lb,ub);el.append(acts);
+      acts.append(ub);el.append(acts);
       body.classList.add("tap");body.setAttribute("role","button");body.tabIndex=0;body.setAttribute("aria-label","עריכת "+i.name);
       body.addEventListener("click",()=>{if(Date.now()-lastSwipeAt>400)openEdit(i)});
       body.addEventListener("keydown",e=>{if(e.key==="Enter")openEdit(i)});
@@ -838,7 +838,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 setInterval(()=>{if(document.visibilityState==="visible")nextTag()},30*1000); // and every 30 seconds while open
 
 /* ---------- auto-update: phones pick up a new version without reinstalling ---------- */
-const APP_VERSION="20261021145246";
+const APP_VERSION="20261021145352";
 async function checkUpdate(){
   try{
     const t=await (await fetch(location.pathname+"?check="+Date.now(),{cache:"no-store"})).text();
