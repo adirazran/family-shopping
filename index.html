@@ -134,6 +134,27 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.25rem,6vw,1.7rem
 .rbar button{border:0;background:none;font-size:1.7rem;padding:2px 4px;border-radius:999px;line-height:1}
 .rbar button.sel{background:var(--leaf-soft)}
 .swhint{font-size:.85rem;color:var(--muted);text-align:center;margin:-4px 0 10px}
+.junk{margin-inline-start:6px;font-size:1rem}
+.bet{background:#f0f7ee;border:1px solid #c9e2c4;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px}
+.bet h4{margin:0;font-size:1.1rem}
+.bet .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.bet input{width:7.5em;font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.bet button{border:0;background:var(--leaf);color:#fff;border-radius:999px;padding:8px 14px;font-weight:700}
+.bet button.ghost{background:var(--surface);color:var(--fg);border:1px solid var(--line)}
+.bet small{color:var(--muted);font-size:.9rem}
+.bet ol{margin:0;padding-inline-start:1.4em;display:flex;flex-direction:column;gap:2px}
+.statsbtn{display:block;margin:22px auto 6px;border:1px dashed var(--line);background:var(--surface);border-radius:999px;padding:8px 16px;font-weight:700;color:var(--muted)}
+.modal .panel{gap:10px}
+.modal .big{font-size:1.25rem;font-weight:700;line-height:1.5}
+.modal ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.modal li{background:var(--sunk);border-radius:12px;padding:10px 12px;font-size:1.05rem;line-height:1.45}
+.modal .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.modal input{width:7.5em;font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.tools{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:700;font-size:.95rem}
+.chip.on{background:var(--leaf);color:#fff;border-color:var(--leaf)}
+.dept{font-weight:700;font-size:1rem;color:var(--leaf);margin:12px 4px 2px}
+.dept:first-child{margin-top:0}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:40}
 .banner{background:var(--tomato);color:#fff;padding:8px;text-align:center;font-weight:600;font-size:.9rem}
 </style>
@@ -148,7 +169,7 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.25rem,6vw,1.7rem
     </div>
   </header>
 
-  <main class="pane wrap"><div id="bday" class="bday" hidden></div><div id="shop"></div><div id="king" hidden></div><div id="list"></div></main>
+  <main class="pane wrap"><div id="bday" class="bday" hidden></div><div id="shop"></div><div id="king" hidden></div><div id="bet"></div><div id="list"></div><button class="statsbtn" id="statsBtn" type="button">📊 סטטיסטיקות מביכות של החודש</button></main>
 
   <div class="bottom wrap">
     <div class="sugs" id="sugs" hidden></div>
@@ -176,6 +197,13 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.25rem,6vw,1.7rem
       <button id="switchUser" type="button">לא אני – החלפת משתמש</button>
       <button id="closeSheet" class="primary" type="button">סגור</button>
     </div>
+  </div>
+</div>
+<div class="sheet modal" id="modal" hidden>
+  <div class="panel" role="dialog" aria-labelledby="modalTitle">
+    <h3 id="modalTitle"></h3>
+    <div id="modalBody"></div>
+    <div class="sheet-actions"><button id="modalClose" class="primary" type="button">סגור</button></div>
   </div>
 </div>
 <canvas id="confetti" hidden></canvas>
@@ -208,11 +236,12 @@ const AVATARS=AVATAR_GROUPS.flatMap(g=>g[1]);
 const EMO=[["מלפפון חמוץ","🥒"],["מלפפון","🥒"],["עגבני","🍅"],["תפוחי אדמה","🥔"],["תפוח אדמה","🥔"],["בטטה","🍠"],["תפוח","🍎"],["בננ","🍌"],["אבוקדו","🥑"],["לימון","🍋"],["תפוז","🍊"],["קלמנטינ","🍊"],["ענב","🍇"],["אבטיח","🍉"],["מלון","🍈"],["אגס","🍐"],["אפרסק","🍑"],["דובדבן","🍒"],["אננס","🍍"],["מנגו","🥭"],["גזר","🥕"],["בצל","🧅"],["שום","🧄"],["גמבה","🫑"],["פלפל","🌶️"],["חציל","🍆"],["תירס","🌽"],["חסה","🥬"],["כרוב","🥬"],["ברוקולי","🥦"],["פטרי","🍄"],["פטרוזיליה","🌿"],["כוסברה","🌿"],["שמיר","🌿"],["נענע","🌿"],["זית","🫒"],["חלב","🥛"],["שוקו","🧋"],["גבינ","🧀"],["קוטג","🧀"],["יוגורט","🥣"],["מעדנ","🍮"],["חמאה","🧈"],["ביצ","🥚"],["לחמני","🥯"],["לחם","🍞"],["פית","🫓"],["תות","🍓"],["באגט","🥖"],["קרואסון","🥐"],["עוף","🍗"],["פרגי","🍗"],["שניצל","🍗"],["נקניק","🌭"],["פסטרמה","🥓"],["בשר","🥩"],["סטייק","🥩"],["המבורגר","🍔"],["דגני","🥣"],["דג","🐟"],["סלמון","🐟"],["טונה","🐟"],["אורז","🍚"],["פסט","🍝"],["ספגטי","🍝"],["פתיתים","🍚"],["קמח","🌾"],["סוכר","🍬"],["מלח","🧂"],["שמן","🫗"],["קטשופ","🍅"],["חומוס","🫘"],["טחינה","🥣"],["דבש","🍯"],["ריבה","🍓"],["קורנפלקס","🥣"],["קפה","☕"],["תה","🍵"],["מים","💧"],["קולה","🥤"],["מיץ","🧃"],["ביר","🍺"],["יין","🍷"],["במבה","🥜"],["ביסלי","🥨"],["צ׳יפס","🍟"],["צ'יפס","🍟"],["עוגי","🍪"],["עוגה","🍰"],["שוקולד","🍫"],["ממתק","🍬"],["סוכרי","🍭"],["גלידה","🍦"],["פיצה","🍕"],["נייר טואלט","🧻"],["מגבות","🧻"],["טישו","🧻"],["סבון","🧼"],["כביסה","🧺"],["מרכך","🧺"],["שקיות","🛍️"],["שמפו","🧴"],["משחת שיניים","🪥"],["מברשת","🪥"],["חיתול","👶"],["סוללה","🔋"],["נורה","💡"],["אוכל לכלב","🐶"],["אוכל לחתול","🐱"],["פרחים","💐"],["תבלין","🧂"]];
 const FIN={"ן":"נ","ם":"מ","ץ":"צ","ף":"פ","ך":"כ","׳":"'"};
 function fin(x){return x.replace(/[ןםץףך׳]/g,c=>FIN[c])}
-function emojiFor(name){const n=fin(name);for(const [k,e] of EMO){if(n.includes(fin(k)))return e}return "🛒"}
+function emojiFor(name){const n=fin(name);let best="🛒",len=0;for(const [k,e] of EMO){const f=fin(k);if(n.includes(f)&&f.length>len){best=e;len=f.length}}return best}
 const P = Object.fromEntries(PEOPLE.map(p=>[p.id,p]));
 const $ = id => document.getElementById(id);
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
+let statsChecked=false, byDept=store.get("byDept")==="1";
 let me=null, db=null, all=[], clearArmed=false, profiles={};
 
 function av(id){const p=P[id]||{name:"?",color:"#777"};const s=document.createElement("span");s.className="av";const e=(profiles[id]||{}).emoji;
@@ -287,7 +316,7 @@ function parse(text){
 let dragging=false,pendingRender=false;
 function render(){
   if(dragging){pendingRender=true;return}
-  renderKing();renderShop();renderBday();
+  renderKing();renderShop();renderBday();renderBet();
   const box=$("list");box.replaceChildren();
   const live=all.filter(i=>!i.archived);
   const open=live.filter(i=>!i.done).sort((a,b)=>(b.urgent?1:0)-(a.urgent?1:0)||a.createdAt-b.createdAt);
@@ -309,6 +338,7 @@ function render(){
     if(Object.keys(rc).length){const lk=document.createElement("span");lk.className="likes";
       lk.textContent=Object.entries(rc).sort((a,b)=>b[1]-a[1]).map(([e,c])=>c>1?e+c:e).join(" ");
       lk.title=Object.entries(who).map(([e,ns])=>e+" "+ns.join(", ")).join(" · ");n.append(lk)}
+    if(isJunk(i.name)){const jk=document.createElement("span");jk.className="junk";jk.textContent="😈";jk.title="מדד החרטא: לא חיוני";n.append(jk)}
     if(!i.done&&i.createdAt>lastSeen&&!(i.requesters||[]).every(r=>r===me)){const nw=document.createElement("span");nw.className="new";nw.textContent="חדש";n.append(nw)}
     const r=document.createElement("div");r.className="req";
     const w=document.createElement("span");w.className="when";
@@ -329,7 +359,17 @@ function render(){
   };
   const wrap=i=>{const it=mk(i);const sw=document.createElement("div");sw.className="sw";const bg=document.createElement("div");bg.className="bg";
     const L=document.createElement("span"),R=document.createElement("span");bg.append(L,R);sw.append(bg,it);addSwipe(sw,it,bg,L,R,i);return sw};
-  if(open.length){const l=document.createElement("div");l.className="list";open.forEach(i=>l.append(wrap(i)));box.append(l);
+  if(open.length){
+    const tools=document.createElement("div");tools.className="tools";
+    const tg=document.createElement("button");tg.type="button";tg.className="chip"+(byDept?" on":"");tg.textContent=byDept?"🗂 לפי מחלקות ✓":"🗂 סידור לפי מחלקות";
+    tg.onclick=()=>{byDept=!byDept;store.set("byDept",byDept?"1":"0");render()};
+    const cnt=document.createElement("span");cnt.style.cssText="color:var(--muted);font-weight:700";cnt.textContent=open.length+" לקנות";
+    tools.append(tg,cnt);box.append(tools);
+    const l=document.createElement("div");l.className="list";
+    if(byDept){const order=[...DEPTS.map(d=>d[0]),OTHER];const g={};open.forEach(i=>{const d=deptOf(i.name);(g[d]=g[d]||[]).push(i)});
+      order.forEach(d=>{if(!g[d])return;const h=document.createElement("div");h.className="dept";h.textContent=d+" ("+g[d].length+")";l.append(h);g[d].forEach(i=>l.append(wrap(i)))})}
+    else open.forEach(i=>l.append(wrap(i)));
+    box.append(l);
     if(store.get("swhint")!=="1"){const h=document.createElement("div");h.className="swhint";h.textContent="טיפ: החליקו פריט ימינה ✔ = נקנה · שמאלה 🗑 = מחיקה";box.prepend(h)}}
   else{const e=document.createElement("div");e.className="empty";e.innerHTML="<strong>הכול נקנה 🎉</strong>";box.append(e)}
   if(done.length){
@@ -360,6 +400,141 @@ function renderKing(){
   const c=document.createElement("span");c.className="crown";c.textContent="👑";
   const t=document.createElement("div");const b=document.createElement("b");b.textContent="מלך הבקשות: "+nmA(kid)+" ("+n+")";
   const sm=document.createElement("small");sm.textContent=line;t.append(b,sm);box.append(c,t);box.hidden=false;
+}
+
+/* ---------- supermarket departments ---------- */
+const DEPTS=[
+ ["🥬 ירקות ופירות",["מלפפון","עגבני","תפוח","בננ","אבוקדו","לימון","תפוז","קלמנטינ","ענב","אבטיח","מלון","תות","אגס","אפרסק","דובדבן","אננס","מנגו","גזר","בצל","שום","גמבה","פלפל","חציל","תירס","חסה","כרוב","ברוקולי","כרובית","פטרי","פטרוזיליה","כוסברה","שמיר","נענע","בטטה","קישוא","דלעת","סלק","צנון","ג׳ינג׳ר","תמר","קיווי","רימון","פירות","ירקות"]],
+ ["🥛 מוצרי חלב וביצים",["חלב","שוקו","גבינ","קוטג","יוגורט","מעדנ","חמאה","שמנת","ביצ","לבנה","דנונה","מילקי","פודינג"]],
+ ["🍞 לחם ומאפים",["לחם","לחמני","פית","באגט","חלה","קרואסון","בורקס","טורטיי","לאפה","פרנה"]],
+ ["🥩 בשר, עוף ודגים",["עוף","פרגי","שניצל","נקניק","פסטרמה","בשר","סטייק","המבורגר","קבב","כבד","הודו","שוקיים","כנפיים","דג","סלמון","אמנון","דניס","לברק"]],
+ ["🧊 קפואים",["קפוא","גלידה","ארטיק","אפונה","שעועית ירוקה","ציפס קפוא","פיצה קפואה"]],
+ ["🥫 מזווה",["אורז","פסט","ספגטי","פתיתים","קמח","סוכר","מלח","שמן","קטשופ","מיונז","חומוס","טחינה","דבש","ריבה","קורנפלקס","דגני","טונה","שימור","רסק","תבלין","פפריקה","כמון","קפה","תה","קקאו","נוטלה","זית","מלפפון חמוץ","חמוצים","תירס שימורים","עדשים","בורגול","קוסקוס","פירורי לחם","אבקת אפייה","שמרים","ממרח","חרדל","סויה","רוטב"]],
+ ["🍫 חטיפים ומתוקים",["במבה","ביסלי","צ׳יפס","צ'יפס","ציפס","תפוצ","דוריטוס","שוקולד","ממתק","סוכרי","עוגי","עוגה","וופל","ופלים","חטיף","מסטיק","פופקורן","דובונים","קינדר","מרשמלו","אפרופו","קרמבו","פסק זמן","כיף כף","מקופלת","פרינגלס","גומי","בייגלה","בוטנים","פיצוחים","גרעינים","שקדים","אגוזים"]],
+ ["🥤 משקאות",["מים","קולה","ספרייט","פאנטה","מיץ","סודה","בירה","בירות","יין","וודקה","ערק","משקה","פריגת","תפוזינה","נביעות","רד בול"]],
+ ["🧼 ניקיון וטואלטיקה",["נייר טואלט","מגבות","טישו","מגבונים","סבון","כביסה","מרכך","אקונומיקה","שקיות","שמפו","משחת שיניים","מברשת","דאודורנט","סקוץ","ספוג","נייר כסף","ניילון נצמד","חיתול","תחבושות","קרם","מטהר","כלים","אשפה"]],
+];
+const OTHER="🛒 שונות";
+function deptOf(name){const n=fin(name);
+  // longer keywords first so "מלפפון חמוץ" lands in the pantry, not vegetables
+  let best=null,len=0;DEPTS.forEach(([d,ks])=>ks.forEach(k=>{const f=fin(k);if(n.includes(f)&&f.length>len){best=d;len=f.length}}));
+  return best||OTHER}
+
+/* ---------- nonsense index 😈 ---------- */
+const JUNK=["במבה","ביסלי","צ׳יפס","צ'יפס","ציפס","תפוצ","דוריטוס","שוקולד","ממתק","סוכרי","גלידה","ארטיק","עוגי","עוגה","עוגת","וופל","ופלים","חטיף","מסטיק","פופקורן","דובונים","קינדר","מרשמלו","אפרופו","קולה","ספרייט","פאנטה","משקה אנרגיה","רד בול","בירה","בירות","יין","וודקה","ערק","סופגני","קרמבו","פסק זמן","כיף כף","מקופלת","טורטית","שוגי","נוטלה","פרינגלס","גומי"];
+function isJunk(name){const n=fin(name);return JUNK.some(k=>n.includes(fin(k)))}
+function junkLine(p){return p===0?"קנייה של נזירים 🧘":p<20?"כמעט בריאים 🥦":p<40?"איזון עדין 😇":p<60?"חצי אוכל, חצי חרטא 😅":"זו לא קנייה, זו מסיבה 🎉😈"}
+function openModal(title,nodes){$("modalTitle").textContent=title;$("modalBody").replaceChildren(...nodes);$("modal").hidden=false}
+$("modalClose").onclick=()=>$("modal").hidden=true;
+$("modal").onclick=e=>{if(e.target.id==="modal")$("modal").hidden=true};
+function li(t){const l=document.createElement("li");l.textContent=t;return l}
+function showSummary(bought,mins,left){
+  const total=bought.length;if(!total&&!(left||[]).length)return;
+  const junk=bought.filter(x=>isJunk(x.name)).length,pct=total?Math.round(junk*100/total):0;
+  const big=document.createElement("div");big.className="big";
+  big.textContent="סה״כ קנייה: "+total+" מוצרים, מתוכם "+junk+" שטויות 😈";
+  const ul=document.createElement("ul");
+  ul.append(li("מדד החרטא: "+pct+"% · "+junkLine(pct)));
+  if(mins)ul.append(li("⏱ זמן בסופר: "+mins+" דקות"));
+  if(left&&left.length)ul.append(li("🤔 נשאר ברשימה: "+left.map(x=>x.name).join(", ")));
+  const nodes=[big,ul];
+  if(bet&&Object.keys(bet.guesses||{}).length&&bet.actual==null){
+    const row=document.createElement("div");row.className="row";
+    const lab=document.createElement("b");lab.textContent="💰 כמה יצא בקופה?";
+    const inp=document.createElement("input");inp.type="number";inp.inputMode="decimal";inp.placeholder="₪";inp.id="actualM";
+    const b=document.createElement("button");b.className="primary";b.textContent="מי ניצח?";b.style.cssText="border:0;background:var(--leaf);color:#fff;border-radius:999px;padding:8px 14px;font-weight:700";
+    b.onclick=async()=>{const v=parseFloat(inp.value);if(!(v>0))return;$("modal").hidden=true;await revealBet(v)};
+    row.append(lab,inp,b);nodes.push(row);
+  }
+  openModal("🧾 סיכום קנייה",nodes);
+  if(total)setTimeout(()=>{tada();confetti("")},200);
+}
+
+/* ---------- receipt bet: "שר האוצר" ---------- */
+let bet=null,betScore={};
+function renderBet(){
+  const box=$("bet");box.replaceChildren();if(!me)return;
+  const active=shopping&&shopping.who&&Date.now()-shopping.since<3*3600e3;
+  const g=(bet&&bet.guesses)||{},has=Object.keys(g).length;
+  const revealed=bet&&bet.actual!=null&&Date.now()-(bet.at||0)<12*3600e3;
+  if(!active&&!has&&!revealed)return;
+  if(bet&&bet.actual!=null&&!revealed&&!active)return;
+  const c=document.createElement("div");c.className="bet";
+  const h=document.createElement("h4");h.textContent="💰 הימור על החשבון";c.append(h);
+  if(revealed){
+    const ranked=Object.entries(g).sort((a,b)=>Math.abs(a[1]-bet.actual)-Math.abs(b[1]-bet.actual));
+    const t=document.createElement("div");t.textContent="יצא בקופה: ₪"+bet.actual+". שר האוצר: "+nmA(bet.winner)+" 👑";t.style.fontWeight="700";c.append(t);
+    const ol=document.createElement("ol");ranked.forEach(([p,v])=>{const x=document.createElement("li");x.textContent=nmA(p)+": ₪"+v+" (פער "+Math.round(Math.abs(v-bet.actual))+")";ol.append(x)});c.append(ol);
+  }else{
+    const sm=document.createElement("small");sm.textContent="כל אחד מנחש כמה תעלה הקנייה. הכי קרוב מקבל את התואר ״שר האוצר״ 👑";c.append(sm);
+    const row=document.createElement("div");row.className="row";
+    const inp=document.createElement("input");inp.type="number";inp.inputMode="decimal";inp.placeholder="₪";inp.id="myGuess";inp.setAttribute("aria-label","הניחוש שלי בשקלים");if(g[me])inp.value=g[me];
+    const b=document.createElement("button");b.textContent=g[me]?"עדכון ניחוש":"הניחוש שלי";
+    b.onclick=async()=>{const v=parseFloat(inp.value);if(!(v>0))return;try{await db.collection("bets").doc("current").set({guesses:{...g,[me]:v},actual:null,winner:"",at:Date.now()});toast("הניחוש נשמר 🤫")}catch(e){toast("לא נשמר, נסו שוב")}};
+    row.append(inp,b);c.append(row);
+    if(has){const w=document.createElement("small");w.textContent="ניחשו: "+Object.keys(g).map(nmA).join(", ")+" (הסכומים סודיים עד הקופה 🤫)";c.append(w)}
+    if(has){const r2=document.createElement("div");r2.className="row";
+      const a=document.createElement("input");a.type="number";a.inputMode="decimal";a.placeholder="₪";a.id="actualIn";a.setAttribute("aria-label","כמה יצא בקופה");
+      const rb=document.createElement("button");rb.className="ghost";rb.textContent="יצא בקופה – מי ניצח?";
+      rb.onclick=async()=>{const v=parseFloat(a.value);if(v>0)await revealBet(v)};r2.append(a,rb);c.append(r2)}
+  }
+  const champ=Object.entries(betScore).sort((a,b)=>b[1]-a[1])[0];
+  if(champ){const sc=document.createElement("small");sc.textContent="טבלת שרי האוצר: "+Object.entries(betScore).sort((a,b)=>b[1]-a[1]).map(([p,n])=>nmA(p)+" "+n).join(" · ");c.append(sc)}
+  box.append(c);
+}
+async function revealBet(actual){
+  const g=(bet&&bet.guesses)||{};const ranked=Object.entries(g).sort((a,b)=>Math.abs(a[1]-actual)-Math.abs(b[1]-actual));
+  if(!ranked.length)return;const winner=ranked[0][0];
+  try{
+    await db.collection("bets").doc("current").set({guesses:g,actual,winner,at:Date.now()});
+    await db.collection("bets").doc("score").set({counts:{...betScore,[winner]:(betScore[winner]||0)+1}});
+    toast("שר האוצר: "+nm(winner)+" 👑💰");tada();confetti("");
+  }catch(e){toast("לא נשמר, נסו שוב")}
+}
+
+/* ---------- embarrassing monthly stats ---------- */
+function monthStats(from,to){
+  const its=all.filter(i=>i.createdAt>=from&&i.createdAt<to||(i.doneAt&&i.doneAt>=from&&i.doneAt<to));
+  const lines=[];
+  const bought={};its.filter(i=>i.done&&i.doneAt>=from&&i.doneAt<to).forEach(i=>{const k=norm(i.name);bought[k]=(bought[k]||0)+(i.qty||1)});
+  const top=Object.entries(bought).sort((a,b)=>b[1]-a[1])[0];
+  if(top&&top[1]>=2)lines.push(emojiFor(top[0])+" החודש קניתם "+top[1]+" × "+top[0]+".");
+  const late={};its.filter(i=>i.duringShop).forEach(i=>(i.requesters||[]).forEach(r=>late[r]=(late[r]||0)+1));
+  const lt=Object.entries(late).sort((a,b)=>b[1]-a[1])[0];
+  if(lt)lines.push("🏃 "+nmA(lt[0])+" הוסיף/ה הכי הרבה מוצרים אחרי שכבר התחילה הקנייה ("+lt[1]+").");
+  const miss=all.filter(i=>(i.missed||0)>0&&i.createdAt<to).sort((a,b)=>(b.missed||0)-(a.missed||0))[0];
+  if(miss)lines.push("🙈 הפריט שנשכח הכי הרבה: "+miss.name+" ("+miss.missed+" פעמים).");
+  const doneIts=its.filter(i=>i.done&&i.doneAt>=from&&i.doneAt<to);
+  if(doneIts.length){const p=Math.round(doneIts.filter(i=>isJunk(i.name)).length*100/doneIts.length);lines.push("😈 מדד החרטא החודשי: "+p+"% · "+junkLine(p))}
+  const chk={};doneIts.forEach(i=>{if(i.doneBy)chk[i.doneBy]=(chk[i.doneBy]||0)+1});
+  const ck=Object.entries(chk).sort((a,b)=>b[1]-a[1])[0];
+  if(ck)lines.push("🛒 הקונה הכי חרוץ/ה: "+nmA(ck[0])+" סימן/ה "+ck[1]+" פריטים.");
+  const req={};its.filter(i=>i.createdAt>=from&&i.createdAt<to).forEach(i=>(i.requesters||[]).forEach(r=>req[r]=(req[r]||0)+1));
+  const lazy=PEOPLE.filter(p=>!req[p.id]).map(p=>nm(p.id));
+  if(lazy.length&&lazy.length<PEOPLE.length)lines.push("😴 לא ביקשו כלום החודש: "+lazy.join(", ")+". חשוד.");
+  const champ=Object.entries(betScore).sort((a,b)=>b[1]-a[1])[0];
+  if(champ)lines.push("💰 שר האוצר המכהן: "+nmA(champ[0])+" ("+champ[1]+" ניצחונות).");
+  return lines;
+}
+function showStats(prev){
+  const now=new Date();
+  const y=now.getFullYear(),m=now.getMonth()-(prev?1:0);
+  const from=Math.max(new Date(y,m,1).getTime(),KING_FROM),to=prev?new Date(y,m+1,1).getTime():Date.now()+1;
+  const mName=MONTHS[(m+12)%12];
+  const lines=monthStats(from,to);
+  const ul=document.createElement("ul");
+  if(lines.length)lines.forEach(t=>ul.append(li(t)));
+  else ul.append(li("עוד אין מספיק נתונים. תחזרו בעוד כמה קניות 😉"));
+  openModal("📊 סטטיסטיקות מביכות · "+mName,[ul]);
+}
+$("statsBtn").onclick=()=>showStats(false);
+function maybeAutoStats(){
+  const now=new Date();if(now.getDate()>5||!me)return;
+  const key="stats_"+now.getFullYear()+"_"+now.getMonth();
+  if(store.get(key)==="1")return;
+  const prevStart=new Date(now.getFullYear(),now.getMonth()-1,1).getTime();
+  if(Date.now()-KING_FROM<3*864e5&&KING_FROM>prevStart)return; // not enough real data yet
+  store.set(key,"1");setTimeout(()=>showStats(true),1200);
 }
 
 /* ---------- swipe: right = bought, left = trash ---------- */
@@ -438,8 +613,16 @@ function renderShop(){
   box.append(w);
 }
 async function setShopping(on){
+  const since=shopping&&shopping.since;
   try{await db.collection("status").doc("shopping").set(on?{who:me,since:Date.now()}:{who:"",since:0});
-    toast(on?"בהצלחה בסופר! 🛒":"תודה! 🙌")}catch(err){toast("לא נשמר, נסו שוב")}
+    if(on){toast("בהצלחה בסופר! 🛒");if(bet&&bet.actual!=null){await db.collection("bets").doc("current").set({guesses:{},actual:null,winner:"",at:Date.now()})}}
+  }catch(err){toast("לא נשמר, נסו שוב");return}
+  if(!on){
+    const left=all.filter(x=>!x.archived&&!x.done);
+    for(const x of left){try{await db.collection("items").doc(x.id).update({missed:(x.missed||0)+1})}catch(e){}}
+    const bought=all.filter(x=>x.done&&x.doneAt>=(since||0));
+    showSummary(bought,since?Math.round((Date.now()-since)/60000):null,left);
+  }
 }
 setInterval(()=>{if(shopping&&shopping.who)renderShop()},60000);
 
@@ -467,8 +650,8 @@ function pop(){if(muted)return;try{actx=actx||new (window.AudioContext||window.w
   g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.001,t+.1);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.16)}catch(e){}}
 function tada(){if(muted)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[523,659,784,1047].forEach((f,k)=>{const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime+k*.11;
   o.type="triangle";o.frequency.value=f;g.gain.setValueAtTime(.05,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.36)})}catch(e){}}
-function confetti(){
-  if(matchMedia("(prefers-reduced-motion: reduce)").matches){toast("כל הכבוד! הכול נקנה 🎉");return}
+function confetti(msg="כל הכבוד! הכול נקנה 🎉"){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){if(msg)toast(msg);return}
   const cv=$("confetti"),ctx=cv.getContext("2d");cv.hidden=false;cv.width=innerWidth;cv.height=innerHeight;
   const cols=["#2f7a4a","#d9482b","#f2b705","#3b82f6","#ec4899","#8b5cf6"];
   const ps=Array.from({length:160},()=>({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,w:6+Math.random()*6,h:8+Math.random()*8,
@@ -477,7 +660,7 @@ function confetti(){
   (function frame(t){ctx.clearRect(0,0,cv.width,cv.height);
     ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()});
     if(t-t0<3200)requestAnimationFrame(frame);else{ctx.clearRect(0,0,cv.width,cv.height);cv.hidden=true}})(t0);
-  toast("כל הכבוד! הכול נקנה 🎉");
+  if(msg)toast(msg);
 }
 
 /* ---------- autocomplete ---------- */
@@ -522,7 +705,8 @@ async function addText(text){
         const upd={requesters:reqs}; if(qty) upd.qty=qty;
         await db.collection("items").doc(ex.id).update(upd);
       }else{
-        await db.collection("items").add({name,qty:qty||null,requesters:[me],createdAt:Date.now(),done:false,doneBy:null,doneAt:null,archived:false});
+        const ds=!!(shopping&&shopping.who&&Date.now()-shopping.since<3*3600e3);
+        await db.collection("items").add({name,qty:qty||null,requesters:[me],createdAt:Date.now(),done:false,doneBy:null,doneAt:null,archived:false,duringShop:ds});
       }
       names.push(name);
     }catch(e){toast("לא הצלחתי להוסיף את "+name)}
@@ -570,7 +754,7 @@ async function throwToBin(el){
   await bin.animate([{transform:"rotate(0)"},{transform:"rotate(-14deg)"},{transform:"rotate(12deg)"},{transform:"rotate(-6deg)"},{transform:"rotate(0)"}],{duration:380}).finished;
   bin.animate([{opacity:1},{opacity:0,transform:"translateY(20px)"}],{duration:250,fill:"forwards"}).finished.then(()=>bin.remove());
 }
-async function archiveDone(list){for(const i of list){try{await db.collection("items").doc(i.id).update({archived:true,archivedAt:Date.now()})}catch(e){}}toast("הרשימה נוקתה")}
+async function archiveDone(list){if(!(shopping&&shopping.who))showSummary(list,null,[]);for(const i of list){try{await db.collection("items").doc(i.id).update({archived:true,archivedAt:Date.now()})}catch(e){}}toast("הרשימה נוקתה")}
 
 /* ---------- input ---------- */
 $("input").addEventListener("input",()=>{$("sendBtn").disabled=!$("input").value.trim();renderSugs()});
@@ -589,8 +773,12 @@ try{
   firebase.initializeApp(FIREBASE_CONFIG); db=firebase.firestore();
   db.collection("items").orderBy("createdAt","desc").limit(800).onSnapshot(s=>{
     all=s.docs.map(d=>({id:d.id,...d.data()}));render();
+    if(!statsChecked){statsChecked=true;setTimeout(maybeAutoStats,1500)}
   },()=>offline("אין חיבור לרשימה – בדקו אינטרנט ורעננו"));
-  db.collection("status").doc("shopping").onSnapshot(d=>{shopping=d.exists?d.data():null;renderShop()},()=>{});
+  db.collection("status").doc("shopping").onSnapshot(d=>{shopping=d.exists?d.data():null;renderShop();renderBet()},()=>{});
+  db.collection("bets").doc("current").onSnapshot(d=>{bet=d.exists?d.data():null;const f=document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#bet");if(!f)renderBet()},()=>{});
+  db.collection("bets").doc("score").onSnapshot(d=>{betScore=(d.exists&&d.data().counts)||{};renderBet()},()=>{});
+
   db.collection("profiles").onSnapshot(s=>{profiles={};s.docs.forEach(d=>profiles[d.id]=d.data());refreshMe();render()},()=>{});
 }catch(e){offline("שגיאה בחיבור לנתונים")}
 </script>

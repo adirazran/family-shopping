@@ -35,6 +35,15 @@ service cloud.firestore {
                    && request.resource.data.since is number;
     }
 
+    // הימור על החשבון – "שר האוצר"
+    match /bets/{id} {
+      allow read: if true;
+      allow write: if (id == 'current'
+                       && request.resource.data.keys().hasOnly(['guesses', 'actual', 'winner', 'at']))
+                   || (id == 'score'
+                       && request.resource.data.keys().hasOnly(['counts']));
+    }
+
     // ===== תוכנת הוצאות למשפחה (family-expenses) =====
     // לכל ילד מפתח סודי משלו בקישור. רק מי שמחזיק את הקישור רואה את הגיליון.
     // אי אפשר לקבל רשימה של כל הגיליונות (אין כלל ל-/fx/{key} עצמו).
