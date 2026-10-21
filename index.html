@@ -87,7 +87,7 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.15rem,5.2vw,1.45
 .person .av{width:44px;height:44px;font-size:1.1rem}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(130px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:999px;font-weight:600;z-index:30;white-space:nowrap}
 .av.emo{background:var(--sunk)!important;font-size:1.25rem}
-.emoji{font-size:1.4rem;width:30px;text-align:center;flex:none}
+.emoji{font-size:1.3rem;width:26px;text-align:center;flex:none}
 .item.done .emoji{opacity:.5}
 @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
 @keyframes flash{0%{background:var(--leaf-soft)}100%{background:var(--surface)}}
@@ -392,7 +392,7 @@ function render(){
       const line=document.createElement("div");line.className="line2";line.append(st,r);
       body.append(n,line);
     }else body.append(n,r);
-    el.append(c,body);el.dataset.id=i.id;
+    el.append(c,em,body);el.dataset.id=i.id;
     if(!i.done){
       const acts=document.createElement("div");acts.className="acts";
       const lb=document.createElement("button");lb.className="ibtn"+(myReact?" on":"");lb.textContent=myReact||"😀";lb.setAttribute("aria-label","תגובה");lb.onclick=e=>{e.stopPropagation();openReacts(i,lb)};
@@ -889,7 +889,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 setInterval(()=>{if(document.visibilityState==="visible")nextTag()},30*1000); // and every 30 seconds while open
 
 /* ---------- auto-update: phones pick up a new version without reinstalling ---------- */
-const APP_VERSION="20261021153420";
+const APP_VERSION="20261021153450";
 async function checkUpdate(){
   try{
     const t=await (await fetch(location.pathname+"?check="+Date.now(),{cache:"no-store"})).text();
