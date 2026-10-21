@@ -164,6 +164,12 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.25rem,6vw,1.7rem
 .qrow button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--sunk);font-size:1.4rem;font-weight:700;line-height:1}
 .qrow output{min-width:2.5em;text-align:center;font-size:1.3rem;font-variant-numeric:tabular-nums}
 .savebtn{border:0;background:var(--leaf);color:#fff;border-radius:999px;padding:13px;font-weight:700;font-size:1.1rem}
+.line2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.step{display:inline-flex;align-items:center;background:var(--sunk);border-radius:999px;padding:2px;flex:none}
+.step button{width:30px;height:30px;border:0;border-radius:50%;background:var(--surface);font-size:1.15rem;font-weight:700;line-height:1;padding:0;color:var(--fg)}
+.step button:disabled{opacity:.35}
+.sq{min-width:1.8em;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.sq.many{color:var(--tomato)}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:40}
 .banner{background:var(--tomato);color:#fff;padding:8px;text-align:center;font-weight:600;font-size:.9rem}
 </style>
@@ -251,6 +257,7 @@ const P = Object.fromEntries(PEOPLE.map(p=>[p.id,p]));
 const $ = id => document.getElementById(id);
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
+const pendingQ={},qTimers={};
 let lastSwipeAt=0, statsChecked=false, byDept=store.get("byDept")==="1";
 let me=null, db=null, all=[], clearArmed=false, profiles={};
 
@@ -341,7 +348,7 @@ function render(){
     const myReact=reacts[me]||(likes.includes(me)?"❤️":"");
     const em=document.createElement("span");em.className="emoji";em.textContent=emojiFor(i.name);em.setAttribute("aria-hidden","true");
     const n=document.createElement("div");n.className="iname";n.textContent=i.name;
-    if(i.qty>1){const q=document.createElement("span");q.className="qty";q.textContent="×"+i.qty;n.append(q)}
+    if(i.done&&i.qty>1){const q=document.createElement("span");q.className="qty";q.textContent="×"+i.qty;n.append(q)}
     const rc={},who={};
     Object.entries(reacts).forEach(([p,e])=>{rc[e]=(rc[e]||0)+1;(who[e]=who[e]||[]).push(nm(p))});
     likes.filter(p=>!reacts[p]).forEach(p=>{rc["❤️"]=(rc["❤️"]||0)+1;(who["❤️"]=who["❤️"]||[]).push(nm(p))});
@@ -355,7 +362,23 @@ function render(){
     if(i.done){r.textContent="נקנה ע״י "+nmA(i.doneBy);w.textContent=when(i.doneAt)}
     else{const bb=document.createElement("b");bb.textContent=(i.requesters||[]).map(nmA).join(", ");r.append(bb);w.textContent=when(i.createdAt)}
     r.append(w);
-    const body=document.createElement("div");body.className="ibody";body.append(n,r);
+    const body=document.createElement("div");body.className="ibody";
+    if(!i.done){
+      const st=document.createElement("div");st.className="step";
+      const cur=pendingQ[i.id]??(i.qty||1);
+      const mi=document.createElement("button");mi.type="button";mi.textContent="−";mi.setAttribute("aria-label","פחות "+i.name);
+      const ov=document.createElement("span");ov.className="sq"+(cur>1?" many":"");ov.textContent=cur;
+      const pl=document.createElement("button");pl.type="button";pl.textContent="+";pl.setAttribute("aria-label","עוד "+i.name);
+      mi.disabled=cur<=1;
+      const bump=(d,e)=>{e.stopPropagation();const v=Math.min(99,Math.max(1,(pendingQ[i.id]??(i.qty||1))+d));pendingQ[i.id]=v;
+        ov.textContent=v;ov.className="sq"+(v>1?" many":"");mi.disabled=v<=1;pop();
+        clearTimeout(qTimers[i.id]);qTimers[i.id]=setTimeout(async()=>{try{await db.collection("items").doc(i.id).update({qty:v>1?v:null})}catch(err){toast("לא נשמר, נסו שוב")}delete pendingQ[i.id]},600)};
+      mi.onclick=e=>bump(-1,e);pl.onclick=e=>bump(1,e);
+      st.addEventListener("click",e=>e.stopPropagation());
+      st.append(mi,ov,pl);
+      const line=document.createElement("div");line.className="line2";line.append(st,r);
+      body.append(n,line);
+    }else body.append(n,r);
     el.append(c,em,body);el.dataset.id=i.id;
     if(!i.done){
       const acts=document.createElement("div");acts.className="acts";
