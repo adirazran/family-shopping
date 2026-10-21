@@ -155,6 +155,7 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.25rem,6vw,1.7rem
 .chip.on{background:var(--leaf);color:#fff;border-color:var(--leaf)}
 .dept{font-weight:700;font-size:1rem;color:var(--leaf);margin:12px 4px 2px}
 .dept:first-child{margin-top:0}
+.tagline{margin:6px 0 0;color:var(--muted);font-size:1rem;font-style:italic;min-height:1.4em;transition:opacity .4s}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:40}
 .banner{background:var(--tomato);color:#fff;padding:8px;text-align:center;font-weight:600;font-size:.9rem}
 </style>
@@ -167,6 +168,7 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.25rem,6vw,1.7rem
       <h1>הקניות של הבית <span class="count" id="count" hidden>0</span></h1>
       <div style="display:flex;gap:8px;align-items:center"><button class="mute" id="muteBtn" type="button" aria-label="השתקה"></button><button class="me" id="meBtn" title="החלפת משתמש"><span id="meAv"></span><span id="meName"></span></button></div>
     </div>
+    <p class="tagline" id="tagline" aria-live="off"></p>
   </header>
 
   <main class="pane wrap"><div id="bday" class="bday" hidden></div><div id="shop"></div><div id="king" hidden></div><div id="bet"></div><div id="list"></div><button class="statsbtn" id="statsBtn" type="button">📊 סטטיסטיקות מביכות של החודש</button></main>
@@ -763,6 +765,14 @@ $("composer").addEventListener("submit",async e=>{
   $("input").value="";$("sendBtn").disabled=true;renderSugs();
   await addText(v);
 });
+
+/* ---------- rotating taglines ---------- */
+const TAGLINES=["היום קונים חכם. או לפחות מנסים.", "אם זה לא ברשימה, כנראה שלא צריך את זה.", "משפחה אחת, רשימה אחת, מיליון דעות.", "אם שכחתם משהו, אל תאשימו את האפליקציה.", "הכול בשליטה. בערך.", "רשימה מסודרת, משפחה פחות.", "נכנסים ממוקדים. יוצאים עם שטויות.", "כל מוצר נוסף הוא החלטה משפחתית מפוקפקת.", "אם זה לא ברשימה, תחשוב פעמיים.", "הצלחה היא לחזור בלי לשכוח ביצים.", "משימת היום: לא לחזור לסופר שוב בערב.", "עוד קנייה משפחתית יוצאת לדרך.", "במבה היא לא ירק. ניסינו.", "מי שלא כתב, לא מתלונן.", "העגלה מלאה, הארנק פחות.", "גם חלב צריך מישהו שיזכור אותו.", "תכנון זה חצי מהקנייה. החצי השני זה חטיפים.", "שקיות זבל: הגיבורים השקטים של הרשימה."];
+let tagIdx=-1;
+function nextTag(){let k;do{k=Math.floor(Math.random()*TAGLINES.length)}while(k===tagIdx&&TAGLINES.length>1);tagIdx=k;
+  const el=$("tagline");el.style.opacity=0;setTimeout(()=>{el.textContent="“"+TAGLINES[k]+"”";el.style.opacity=1},400)}
+$("tagline").textContent="“"+TAGLINES[tagIdx=Math.floor(Math.random()*TAGLINES.length)]+"”";
+setInterval(nextTag,20000);
 
 /* ---------- start ---------- */
 drawMute();
