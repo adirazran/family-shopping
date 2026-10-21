@@ -476,11 +476,14 @@ async function removeItem(i){
   try{await db.collection("items").doc(i.id).delete()}catch(e){toast("לא נמחק, נסו שוב")}
 }
 function thud(){if(muted)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t=actx.currentTime;
-  const o=actx.createOscillator(),g=actx.createGain();o.type="square";o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(45,t+.18);
-  g.gain.setValueAtTime(.05,t);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.23);
-  const n=actx.createBufferSource(),b=actx.createBuffer(1,actx.sampleRate*.12,actx.sampleRate),d=b.getChannelData(0);
-  for(let k=0;k<d.length;k++)d[k]=(Math.random()*2-1)*(1-k/d.length);
-  const ng=actx.createGain();ng.gain.value=.03;n.buffer=b;n.connect(ng).connect(actx.destination);n.start(t)}catch(e){}}
+  // soft paper "swish" (high-passed noise) + a light metallic "tink" as it lands in the can
+  const n=actx.createBufferSource(),b=actx.createBuffer(1,actx.sampleRate*.09,actx.sampleRate),d=b.getChannelData(0);
+  for(let k=0;k<d.length;k++)d[k]=(Math.random()*2-1)*Math.sin(Math.PI*k/d.length);
+  const hp=actx.createBiquadFilter();hp.type="highpass";hp.frequency.value=2500;
+  const ng=actx.createGain();ng.gain.value=.03;n.buffer=b;n.connect(hp).connect(ng).connect(actx.destination);n.start(t);
+  [1568,2349].forEach((f,k)=>{const o=actx.createOscillator(),g=actx.createGain(),tt=t+.06+k*.02;
+    o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(.035/(k+1),tt);g.gain.exponentialRampToValueAtTime(.0005,tt+.35);
+    o.connect(g).connect(actx.destination);o.start(tt);o.stop(tt+.36)})}catch(e){}}
 async function throwToBin(el){
   const r=el.getBoundingClientRect();
   const bin=document.createElement("div");bin.className="bin";bin.textContent="🗑️";document.body.append(bin);
