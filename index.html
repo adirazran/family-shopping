@@ -61,7 +61,8 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.15rem,5.2vw,1.45
 .when::before{content:" · "}
 .new{background:var(--tomato);color:#fff;border-radius:6px;font-size:.8rem;font-weight:700;padding:1px 6px;margin-inline-start:6px;vertical-align:middle}
 .item.done .req{color:var(--done)}
-.del{border:0;background:none;color:var(--muted);font-size:1.5rem;padding:0 4px;line-height:1}
+.del{border:0;background:var(--sunk);color:var(--fg);font-size:1.6rem;width:40px;height:40px;border-radius:50%;padding:0;line-height:1;flex:none;margin-inline-start:6px;display:grid;place-items:center}
+.del:active{background:#ffe1d9;color:var(--tomato)}
 .del:hover{color:var(--tomato)}
 .section{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:20px 0 8px;font-size:1rem;color:var(--muted);font-weight:700}
 .clear{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:.95rem;font-weight:700}
@@ -888,7 +889,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 setInterval(()=>{if(document.visibilityState==="visible")nextTag()},30*1000); // and every 30 seconds while open
 
 /* ---------- auto-update: phones pick up a new version without reinstalling ---------- */
-const APP_VERSION="20261021153247";
+const APP_VERSION="20261021153420";
 async function checkUpdate(){
   try{
     const t=await (await fetch(location.pathname+"?check="+Date.now(),{cache:"no-store"})).text();
