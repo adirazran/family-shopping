@@ -156,6 +156,14 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.25rem,6vw,1.7rem
 .dept{font-weight:700;font-size:1rem;color:var(--leaf);margin:12px 4px 2px}
 .dept:first-child{margin-top:0}
 .tagline{margin:10px 0 2px;background:var(--leaf-soft);color:var(--leaf);border-radius:12px;padding:8px 12px;font-family:var(--display);font-size:1.15rem;line-height:1.4;min-height:1.4em;text-wrap:balance;transition:opacity .4s}
+.ibody.tap{cursor:pointer;border-radius:8px}
+.ibody.tap:active{background:var(--sunk)}
+.edit{display:flex;flex-direction:column;gap:12px}
+.edit input[type=text]{width:100%;font:inherit;font-size:1.25rem;padding:12px 14px;border-radius:12px;border:2px solid var(--leaf);background:var(--surface);color:var(--fg)}
+.qrow{display:flex;align-items:center;gap:12px;font-weight:700}
+.qrow button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--sunk);font-size:1.4rem;font-weight:700;line-height:1}
+.qrow output{min-width:2.5em;text-align:center;font-size:1.3rem;font-variant-numeric:tabular-nums}
+.savebtn{border:0;background:var(--leaf);color:#fff;border-radius:999px;padding:13px;font-weight:700;font-size:1.1rem}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:40}
 .banner{background:var(--tomato);color:#fff;padding:8px;text-align:center;font-weight:600;font-size:.9rem}
 </style>
@@ -243,7 +251,7 @@ const P = Object.fromEntries(PEOPLE.map(p=>[p.id,p]));
 const $ = id => document.getElementById(id);
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
-let statsChecked=false, byDept=store.get("byDept")==="1";
+let lastSwipeAt=0, statsChecked=false, byDept=store.get("byDept")==="1";
 let me=null, db=null, all=[], clearArmed=false, profiles={};
 
 function av(id){const p=P[id]||{name:"?",color:"#777"};const s=document.createElement("span");s.className="av";const e=(profiles[id]||{}).emoji;
@@ -354,7 +362,9 @@ function render(){
       const lb=document.createElement("button");lb.className="ibtn"+(myReact?" on":"");lb.textContent=myReact||"😀";lb.setAttribute("aria-label","תגובה");lb.onclick=e=>{e.stopPropagation();openReacts(i,lb)};
       const ub=document.createElement("button");ub.className="ibtn"+(i.urgent?" on":"");ub.textContent="🔥";ub.setAttribute("aria-label","דחוף");ub.onclick=()=>urgent(i);
       acts.append(lb,ub);el.append(acts);
-      let lastTap=0;n.addEventListener("click",e=>{const t=Date.now();if(t-lastTap<350){if(!myReact)react(i,"❤️",e)}lastTap=t});
+      body.classList.add("tap");body.setAttribute("role","button");body.tabIndex=0;body.setAttribute("aria-label","עריכת "+i.name);
+      body.addEventListener("click",()=>{if(Date.now()-lastSwipeAt>400)openEdit(i)});
+      body.addEventListener("keydown",e=>{if(e.key==="Enter")openEdit(i)});
     }
     if(!i.done){const d=document.createElement("button");d.className="del";d.textContent="×";d.setAttribute("aria-label","מחק "+i.name);d.onclick=()=>removeItem(i);el.append(d)}
     return el;
@@ -426,6 +436,26 @@ function deptOf(name){const n=fin(name);
 const JUNK=["במבה","ביסלי","צ׳יפס","צ'יפס","ציפס","תפוצ","דוריטוס","שוקולד","ממתק","סוכרי","גלידה","ארטיק","עוגי","עוגה","עוגת","וופל","ופלים","חטיף","מסטיק","פופקורן","דובונים","קינדר","מרשמלו","אפרופו","קולה","ספרייט","פאנטה","משקה אנרגיה","רד בול","בירה","בירות","יין","וודקה","ערק","סופגני","קרמבו","פסק זמן","כיף כף","מקופלת","טורטית","שוגי","נוטלה","פרינגלס","גומי"];
 function isJunk(name){const n=fin(name);return JUNK.some(k=>n.includes(fin(k)))}
 function junkLine(p){return p===0?"קנייה של נזירים 🧘":p<20?"כמעט בריאים 🥦":p<40?"איזון עדין 😇":p<60?"חצי אוכל, חצי חרטא 😅":"זו לא קנייה, זו מסיבה 🎉😈"}
+function openEdit(i){
+  const f=document.createElement("form");f.className="edit";
+  const inp=document.createElement("input");inp.type="text";inp.id="editName";inp.value=i.name;inp.maxLength=80;inp.setAttribute("aria-label","שם הפריט");inp.autocomplete="off";
+  let q=i.qty||1;
+  const qr=document.createElement("div");qr.className="qrow";
+  const lab=document.createElement("span");lab.textContent="כמות:";
+  const minus=document.createElement("button");minus.type="button";minus.textContent="−";minus.setAttribute("aria-label","פחות");
+  const out=document.createElement("output");out.textContent=q;
+  const plus=document.createElement("button");plus.type="button";plus.textContent="+";plus.setAttribute("aria-label","יותר");
+  minus.onclick=()=>{if(q>1){q--;out.textContent=q}};plus.onclick=()=>{if(q<99){q++;out.textContent=q}};
+  qr.append(lab,minus,out,plus);
+  const save=document.createElement("button");save.type="submit";save.className="savebtn";save.textContent="שמור";
+  f.append(inp,qr,save);
+  f.onsubmit=async e=>{e.preventDefault();const name=inp.value.trim();if(!name){inp.focus();return}
+    $("modal").hidden=true;
+    if(name===i.name&&q===(i.qty||1))return;
+    try{await db.collection("items").doc(i.id).update({name,qty:q>1?q:null});toast("עודכן: "+name+(q>1?" ×"+q:""))}catch(err){toast("לא נשמר, נסו שוב")}};
+  openModal("✏️ עריכת פריט",[f]);
+  setTimeout(()=>{inp.focus();inp.select()},50);
+}
 function openModal(title,nodes){$("modalTitle").textContent=title;$("modalBody").replaceChildren(...nodes);$("modal").hidden=false}
 $("modalClose").onclick=()=>$("modal").hidden=true;
 $("modal").onclick=e=>{if(e.target.id==="modal")$("modal").hidden=true};
@@ -547,7 +577,7 @@ function addSwipe(sw,it,bg,L,R,i){
   it.addEventListener("pointermove",e=>{
     if(pid!==e.pointerId)return;
     const mx=e.clientX-x0,my=e.clientY-y0;
-    if(mode===null){if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.3){mode="x";dragging=true;try{it.setPointerCapture(pid)}catch(_){}}else if(Math.abs(my)>10){mode="y";pid=null;return}else return}
+    if(mode===null){if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.3){mode="x";dragging=true;lastSwipeAt=Date.now();try{it.setPointerCapture(pid)}catch(_){}}else if(Math.abs(my)>10){mode="y";pid=null;return}else return}
     if(i.done&&mx<0){dx=0}else dx=mx;
     it.style.transition="none";it.style.transform="translateX("+dx+"px)";
     const right=dx>0;bg.style.opacity=Math.min(1,Math.abs(dx)/TH());
@@ -557,7 +587,7 @@ function addSwipe(sw,it,bg,L,R,i){
   const end=async e=>{
     if(pid!==e.pointerId)return;pid=null;
     if(mode!=="x"){mode=null;return}
-    mode=null;const go=Math.abs(dx)>=TH();
+    mode=null;lastSwipeAt=Date.now();const go=Math.abs(dx)>=TH();
     if(go&&dx<0){store.set("swhint","1");dragging=false;await removeItem(i);if(pendingRender){pendingRender=false;render()}return}
     it.style.transition="transform .2s ease-out";it.style.transform="translateX(0)";bg.style.transition="opacity .2s";bg.style.opacity=0;
     setTimeout(()=>{dragging=false;if(go&&dx>0){store.set("swhint","1");toggle(i)};if(pendingRender){pendingRender=false;render()}},go?120:210);
