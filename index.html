@@ -340,7 +340,7 @@ function render(){
   renderKing();renderShop();renderBday();renderBet();
   const box=$("list");box.replaceChildren();
   const live=all.filter(i=>!i.archived);
-  const open=live.filter(i=>!i.done).sort((a,b)=>(b.urgent?1:0)-(a.urgent?1:0)||a.createdAt-b.createdAt);
+  const open=live.filter(i=>!i.done).sort((a,b)=>(b.urgent?1:0)-(a.urgent?1:0)||b.createdAt-a.createdAt); // urgent first, then newest on top
   const done=live.filter(i=>i.done).sort((a,b)=>(a.doneAt||0)-(b.doneAt||0));
   $("count").hidden=!open.length;$("count").textContent=open.length;
   if(!live.length){box.innerHTML='<div class="empty"><strong>הרשימה ריקה</strong>כתבו למטה מה צריך לקנות.<br>אפשר כמה פריטים ביחד, מופרדים בפסיק.</div>';return}
@@ -838,7 +838,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 setInterval(()=>{if(document.visibilityState==="visible")nextTag()},30*1000); // and every 30 seconds while open
 
 /* ---------- auto-update: phones pick up a new version without reinstalling ---------- */
-const APP_VERSION="20261021145352";
+const APP_VERSION="20261021152757";
 async function checkUpdate(){
   try{
     const t=await (await fetch(location.pathname+"?check="+Date.now(),{cache:"no-store"})).text();
